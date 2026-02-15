@@ -155,12 +155,14 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
       </div>
     </header>
     <main id="main" class="shell">${content}</main>
-    <footer class="sticky-footer" aria-label="Site footer">
-      <div class="shell sticky-footer-shell">
-        <div class="sticky-footer-grid">
+    <footer class="sticky-footer" aria-label="Site footer" data-sticky-footer>
+      <div class="sticky-footer-clip">
+        <div class="sticky-footer-track">
+          <div class="shell sticky-footer-shell sticky-footer-panel" data-footer-panel>
+            <div class="sticky-footer-grid" data-footer-item>
           ${footerData.sections
             .map(
-              (section) => `<section class="footer-nav-section">
+              (section, index) => `<section class="footer-nav-section" data-footer-item style="--footer-item-delay:${index * 0.06}s">
               <h2>${esc(section.title)}</h2>
               <ul>
                 ${section.links
@@ -170,13 +172,13 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
             </section>`
             )
             .join('')}
-        </div>
-        <div class="sticky-footer-bottom">
-          <div>
+            </div>
+            <div class="sticky-footer-bottom" data-footer-item style="--footer-item-delay:0.32s">
+              <div>
             <p class="sticky-footer-title">${esc(footerData.title)}</p>
             <p class="sticky-footer-subtitle">${esc(footerData.subtitle)}</p>
-          </div>
-          <div class="sticky-footer-meta">
+              </div>
+              <div class="sticky-footer-meta">
             <p>${esc(footerData.copyright)}</p>
             <ul class="social-list" aria-label="Social links">
               ${footerData.social
@@ -185,10 +187,13 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
                 )
                 .join('')}
             </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </footer>
+    <script type="module" src="/assets/footer-motion.js"></script>
   </body>
 </html>`;
 
@@ -235,6 +240,7 @@ async function main() {
 
   await writeFile('assets/styles.css', await fs.readFile(path.join(root, 'src/styles.css'), 'utf8'));
   await writeFile('assets/projects.js', await fs.readFile(path.join(root, 'src/projects.js'), 'utf8'));
+  await writeFile('assets/footer-motion.js', await fs.readFile(path.join(root, 'src/footer-motion.js'), 'utf8'));
 
   const featured = projects.slice(0, 3).map(projectCard).join('');
   await writeFile(
