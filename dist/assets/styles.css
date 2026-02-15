@@ -318,6 +318,7 @@ input:focus, select:focus, button:focus, a:focus { outline: 3px solid var(--ring
   width: 0.9em;
   height: 0.9em;
   margin-bottom: 0.03em;
+  color: var(--foreground);
 }
 
 .sticky-footer-title-icon .brand-icon {
