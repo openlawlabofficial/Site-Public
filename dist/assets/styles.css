@@ -523,15 +523,6 @@ input:focus, select:focus, button:focus, a:focus { outline: 3px solid var(--ring
   cursor: pointer;
 }
 
-.dialog-image {
-  width: 100%;
-  border-radius: 0.6rem;
-  border: 1px solid var(--border);
-  display: block;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-}
-
 @keyframes dialog-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
