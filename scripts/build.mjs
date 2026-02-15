@@ -21,34 +21,7 @@ const footerData = {
         { label: 'Home', href: '/' },
         { label: 'Projects', href: '/projects/' },
         { label: 'Our Mission', href: '/about/' },
-        { label: 'Contact Us', href: '/contribute/' }
-      ]
-    },
-    {
-      title: 'Education',
-      links: [
-        { label: 'News', href: '/about/' },
-        { label: 'Learn', href: '/projects/' },
-        { label: 'Certification', href: '/contribute/volunteer/' },
-        { label: 'Publications', href: '/about/' }
-      ]
-    },
-    {
-      title: 'Services',
-      links: [
-        { label: 'Web Design', href: '/projects/' },
-        { label: 'Development', href: '/projects/' },
-        { label: 'Consulting', href: '/contribute/' },
-        { label: 'Support', href: '/contribute/donate/' }
-      ]
-    },
-    {
-      title: 'Resources',
-      links: [
-        { label: 'Blog', href: '/about/' },
-        { label: 'Documentation', href: '/projects/' },
-        { label: 'Community', href: '/contribute/volunteer/' },
-        { label: 'Help Center', href: '/contribute/' }
+        { label: 'Contact Us', href: '/contact/' }
       ]
     }
   ],
@@ -487,7 +460,11 @@ async function main() {
         </ul>
         <p>Submissions go through verification before publication. Approved projects are listed on the site, and non-approved projects receive feedback when possible so they can be improved and resubmitted.</p>
         <p>Submissions are partially anonymous to the public. You may use your first name or a pseudonym.</p>
-        <p><a class="btn" href="/contribute/">Back to Contribute</a></p>
+        <p>Want to submit a project now? Get in touch.</p>
+        <div class="cta-row">
+          <a class="btn" href="/contact/">Contact Us</a>
+          <a class="btn btn-secondary" href="/contribute/">Back to Contribute</a>
+        </div>
       </section>`
     })
   );
@@ -501,9 +478,56 @@ async function main() {
       content: `<section>
         <h1>Volunteer</h1>
         <p>Volunteering supports project review, maintenance, and new development for open legal-aid systems.</p>
-        <p>If you have previously submitted a project that passed verification, you are encouraged to apply as a volunteer contributor.</p>
-        <p>Volunteer roles may include security review, interoperability testing, documentation, and feature development.</p>
-        <p><a class="btn" href="/contribute/">Back to Contribute</a></p>
+        <p>If you would like to become a volunteer, please apply here and we’ll get back to you as soon as possible.</p>
+        <div class="cta-row">
+          <a class="btn" href="/contact/">Contact Us</a>
+          <a class="btn btn-secondary" href="/contribute/">Back to Contribute</a>
+        </div>
+      </section>`
+    })
+  );
+
+  await writeFile(
+    'contact/index.html',
+    layout({
+      title: 'Contact Us | TheOpenLawLab',
+      description: 'Reach out to TheOpenLawLab with questions, collaboration ideas, or contribution inquiries.',
+      canonicalPath: '/contact/',
+      content: `<section>
+        <div class="contact-card">
+          <div class="contact-card-main">
+            <h1>Contact Us</h1>
+            <p>If you have any questions regarding our work or need help, please fill out the form. We do our best to respond within one business day.</p>
+            <div class="contact-highlights" aria-label="Suggested reasons to contact us">
+              <span>Volunteer</span>
+              <span>Submit a Project</span>
+              <span>Help</span>
+              <span>Complaint</span>
+              <span>Other</span>
+            </div>
+          </div>
+          <div class="contact-card-form-wrap">
+            <form class="controls contact-form" name="contact" method="POST" netlify>
+              <input type="hidden" name="form-name" value="contact" />
+              <label for="contact-name">Name</label>
+              <input id="contact-name" name="name" type="text" autocomplete="name" required />
+              <label for="contact-email">Email</label>
+              <input id="contact-email" name="email" type="email" autocomplete="email" required />
+              <label for="contact-topic">Topic</label>
+              <input id="contact-topic" name="topic" type="text" list="contact-topic-suggestions" placeholder="Choose or type a topic" required />
+              <datalist id="contact-topic-suggestions">
+                <option value="Volunteer"></option>
+                <option value="Submit a Project"></option>
+                <option value="Help"></option>
+                <option value="Complaint"></option>
+                <option value="Other"></option>
+              </datalist>
+              <label for="contact-message">Message</label>
+              <textarea id="contact-message" name="message" rows="6" required></textarea>
+              <button class="btn" type="submit">Submit</button>
+            </form>
+          </div>
+        </div>
       </section>`
     })
   );
@@ -518,6 +542,7 @@ async function main() {
         <h1>Donate</h1>
         <p>Donations help sustain hosting, maintenance, and review capacity for open-source legal-aid systems.</p>
         <p>Financial support allows the project to continue publishing free tools and documentation for legal service providers and the communities they serve.</p>
+        <p><strong>Note:</strong> We haven’t configured donations yet.</p>
         <p><a class="btn" href="/contribute/">Back to Contribute</a></p>
       </section>`
     })
