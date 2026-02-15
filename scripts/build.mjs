@@ -65,14 +65,10 @@ const footerData = {
 const requiredFields = [
   'slug',
   'title',
-  'short_description',
+  'overview',
   'full_description',
-  'tags',
-  'github_url',
-  'download_url',
-  'maintainer',
-  'created_at',
-  'updated_at'
+  'project_type',
+  'lastupdate'
 ];
 
 const ensureDir = async (directory) => fs.mkdir(directory, { recursive: true });
@@ -85,8 +81,7 @@ const formatDate = (value) =>
     timeZone: 'UTC'
   });
 
-const normalizeMaintainer = (maintainer) =>
-  Array.isArray(maintainer) ? maintainer.join(', ') : maintainer;
+const optionalText = (value, fallback = 'Not specified') => (value ? String(value) : fallback);
 
 const esc = (str) =>
   String(str)
@@ -204,10 +199,12 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
 
 const projectCard = (project) => `<article class="project-card" data-project-card>
   <h3><a href="/projects/${project.slug}/">${esc(project.title)}</a></h3>
-  <p>${esc(project.short_description)}</p>
-  <p class="meta"><strong>Category:</strong> ${esc(project.category || 'General')}</p>
-  <p class="meta"><strong>Updated:</strong> ${esc(formatDate(project.updated_at))}</p>
-  <ul class="tag-list">${project.tags
+  <p>${esc(project.overview)}</p>
+  <p class="meta"><strong>Topic:</strong> ${esc(project.topic || 'General')}</p>
+  <p class="meta"><strong>Legal Area:</strong> ${esc(project.legal_area || 'General')}</p>
+  <p class="meta"><strong>Project Type:</strong> ${esc(project.project_type)}</p>
+  <p class="meta"><strong>Updated:</strong> ${esc(formatDate(project.lastupdate))}</p>
+  <ul class="tag-list">${project.states_and_territories
     .map((tag) => `<li class="tag">${esc(tag)}</li>`)
     .join('')}</ul>
 </article>`;
@@ -223,13 +220,31 @@ async function loadProjects() {
         throw new Error(`Missing required field \"${field}\" in ${file}`);
       }
     }
-    if (!Array.isArray(project.tags)) {
-      throw new Error(`Field tags must be an array in ${file}`);
+
+    if (!['file', 'repository'].includes(project.project_type)) {
+      throw new Error(`Field project_type must be either "file" or "repository" in ${file}`);
     }
+    if (project.project_type === 'repository' && !project.repository_url) {
+      throw new Error(`Field repository_url is required when project_type is "repository" in ${file}`);
+    }
+    if (project.project_type === 'file' && !project.file_url) {
+      throw new Error(`Field file_url is required when project_type is "file" in ${file}`);
+    }
+    if (project.highlights !== undefined && !Array.isArray(project.highlights)) {
+      throw new Error(`Field highlights must be an array when provided in ${file}`);
+    }
+    if (project.states_and_territories !== undefined && !Array.isArray(project.states_and_territories)) {
+      throw new Error(`Field states_and_territories must be an array when provided in ${file}`);
+    }
+    project.highlights = project.highlights || [];
+    project.states_and_territories = project.states_and_territories || [];
+    project.author = project.author || '';
+    project.topic = project.topic || '';
+    project.legal_area = project.legal_area || '';
     project.featured = Boolean(project.featured);
     projects.push(project);
   }
-  return projects.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+  return projects.sort((a, b) => b.lastupdate.localeCompare(a.lastupdate));
 }
 
 async function writeFile(relativePath, contents) {
@@ -281,17 +296,17 @@ async function main() {
       canonicalPath: '/projects/',
       content: `<section>
         <h1>Project Catalog</h1>
-        <p>Search and filter projects by title, description, tags, and category.</p>
+        <p>Search and filter projects by title, overview, highlights, topic, and states/territories.</p>
         <form class="controls" role="search" aria-label="Project search form">
           <label for="search-input">Search projects</label>
           <div class="search-popover">
-            <input id="search-input" name="q" type="search" autocomplete="off" placeholder="Search title, tags, description" aria-expanded="false" aria-controls="search-popover-content" aria-autocomplete="list" />
+            <input id="search-input" name="q" type="search" autocomplete="off" placeholder="Search title, overview, highlights" aria-expanded="false" aria-controls="search-popover-content" aria-autocomplete="list" />
             <div id="search-popover-content" class="search-popover-content" role="listbox" hidden></div>
           </div>
-          <label for="category-filter">Category</label>
-          <select id="category-filter" name="category"><option value="">All categories</option></select>
+          <label for="category-filter">Topic</label>
+          <select id="category-filter" name="category"><option value="">All topics</option></select>
           <fieldset>
-            <legend>Tags</legend>
+            <legend>States and Territories</legend>
             <div id="tag-filter" class="tag-filter"></div>
           </fieldset>
           <label for="sort-by">Sort by</label>
@@ -311,21 +326,35 @@ async function main() {
 
   for (const project of projects) {
     const html = marked.parse(project.full_description);
+    const highlights = project.highlights.length
+      ? `<section><h2>Highlights</h2><ul>${project.highlights.map((item) => `<li>${esc(item)}</li>`).join('')}</ul></section>`
+      : '';
+    const resourceCta =
+      project.project_type === 'repository'
+        ? `<a class="btn" href="${esc(project.repository_url)}" target="_blank" rel="noopener noreferrer">View Repository</a>`
+        : `<a class="btn" href="${esc(project.file_url)}" target="_blank" rel="noopener noreferrer">Open File</a>`;
     await writeFile(
       `projects/${project.slug}/index.html`,
       layout({
         title: `${project.title} | TheOpenLawLab`,
-        description: project.short_description,
+        description: project.overview,
         canonicalPath: `/projects/${project.slug}/`,
         content: `<article>
           <h1>${esc(project.title)}</h1>
-          <ul class="tag-list">${project.tags.map((tag) => `<li class="tag">${esc(tag)}</li>`).join('')}</ul>
-          <p><strong>Maintainer:</strong> ${esc(normalizeMaintainer(project.maintainer))}</p>
-          <p><strong>Updated:</strong> ${esc(formatDate(project.updated_at))}</p>
+          <ul class="tag-list">${project.states_and_territories.map((item) => `<li class="tag">${esc(item)}</li>`).join('')}</ul>
+          <p><strong>Author:</strong> ${esc(optionalText(project.author))}</p>
+          <p><strong>Topic:</strong> ${esc(optionalText(project.topic))}</p>
+          <p><strong>Legal Area:</strong> ${esc(optionalText(project.legal_area))}</p>
+          <p><strong>Project Type:</strong> ${esc(project.project_type)}</p>
+          <p><strong>Updated:</strong> ${esc(formatDate(project.lastupdate))}</p>
+          <section>
+            <h2>Overview</h2>
+            <p>${esc(project.overview)}</p>
+          </section>
+          ${highlights}
           <div class="markdown">${html}</div>
           <div class="cta-row">
-            <a class="btn" href="${esc(project.github_url)}" target="_blank" rel="noopener noreferrer">View on GitHub</a>
-            <a class="btn btn-secondary" href="${esc(project.download_url)}" target="_blank" rel="noopener noreferrer">Download</a>
+            ${resourceCta}
           </div>
         </article>`
       })
@@ -493,11 +522,13 @@ async function main() {
   const indexData = projects.map((project) => ({
     slug: project.slug,
     title: project.title,
-    short_description: project.short_description,
-    full_description: project.full_description,
-    tags: project.tags,
-    category: project.category || '',
-    updated_at: project.updated_at,
+    overview: project.overview,
+    highlights: project.highlights,
+    states_and_territories: project.states_and_territories,
+    topic: project.topic || '',
+    legal_area: project.legal_area || '',
+    project_type: project.project_type,
+    lastupdate: project.lastupdate,
     featured: Boolean(project.featured)
   }));
 
