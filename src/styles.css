@@ -86,7 +86,21 @@ body {
 .site-header, .site-footer { background: var(--surface); border-bottom: 1px solid var(--border); }
 .site-footer { border-top: 1px solid var(--border); border-bottom: none; margin-top: 2rem; padding: 1rem 0; }
 .nav-wrap { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; }
-.brand { font-weight: 700; text-decoration: none; color: var(--text); }
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.brand-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #ffffff;
+  flex: 0 0 auto;
+}
 .nav-list { list-style: none; padding: 0; margin: 0; display: flex; gap: 1rem; }
 .nav-list a { text-decoration: none; color: var(--text); }
 .hero { padding: 3rem 0 1rem; }
