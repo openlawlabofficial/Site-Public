@@ -58,8 +58,7 @@ const footerData = {
     { href: 'https://www.linkedin.com', label: 'LinkedIn', icon: 'L' }
   ],
   title: 'The Open Law Lab',
-  subtitle: 'Open-source legal infrastructure for everyone',
-  copyright: `©${new Date().getUTCFullYear()} TheOpenLawLab. All rights reserved.`
+  subtitle: 'Open-source legal infrastructure for everyone'
 };
 
 const requiredFields = [
@@ -129,7 +128,6 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
             <li><a href="/contribute/">Contribute</a></li>
           </ul>
         </nav>
-        <button class="btn btn-secondary btn-compact" type="button" data-dialog-trigger>Open Dialog</button>
       </div>
     </header>
     <main id="main" class="shell">${content}</main>
@@ -149,15 +147,9 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
           ×
         </button>
         <div class="dialog-header">
-          <h2 id="dialog-title">Dialog</h2>
-          <p id="dialog-description">An example modal with dotted overlay, blur, keyboard support, and close controls.</p>
+          <h2 id="dialog-title">Welcome to TheOpenLawLab</h2>
+          <p id="dialog-description">We just launched. Thanks for visiting — more projects, tools, and resources are coming soon.</p>
         </div>
-        <img
-          class="dialog-image"
-          src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=80"
-          alt="Team collaborating around a laptop"
-          loading="lazy"
-        />
       </section>
     </div>
 
@@ -184,16 +176,6 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
             <p class="sticky-footer-title">${footerTitle}</p>
             <p class="sticky-footer-subtitle">${esc(footerData.subtitle)}</p>
               </div>
-              <div class="sticky-footer-meta">
-            <p>${esc(footerData.copyright)}</p>
-            <ul class="social-list" aria-label="Social links">
-              ${footerData.social
-                .map(
-                  (social) => `<li><a href="${esc(social.href)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(social.label)}">${esc(social.icon)}</a></li>`
-                )
-                .join('')}
-            </ul>
-              </div>
             </div>
           </div>
         </div>
@@ -217,7 +199,16 @@ const projectCard = (project) => `<article class="project-card" data-project-car
 </article>`;
 
 async function loadProjects() {
-  const files = (await fs.readdir(dataDir)).filter((name) => name.endsWith('.json'));
+  let files = [];
+  try {
+    files = (await fs.readdir(dataDir)).filter((name) => name.endsWith('.json'));
+  } catch (error) {
+    if (error && error.code === 'ENOENT') {
+      return [];
+    }
+    throw error;
+  }
+
   const projects = [];
   for (const file of files) {
     const raw = await fs.readFile(path.join(dataDir, file), 'utf8');
@@ -273,6 +264,9 @@ async function main() {
   await writeFile('assets/footer-o-icon.svg', await fs.readFile(path.join(root, 'src/assets/footer-o-icon.svg'), 'utf8'));
 
   const featured = projects.slice(0, 3).map(projectCard).join('');
+  const featuredSection = featured
+    ? `<div class="grid">${featured}</div>`
+    : '<p class="empty-state">Sorry we can’t find you any projects right now, check back soon!</p>';
   await writeFile(
     'index.html',
     layout({
@@ -293,7 +287,7 @@ async function main() {
       </section>
       <section>
         <h2>Featured Projects</h2>
-        <div class="grid">${featured}</div>
+        ${featuredSection}
       </section>`
     })
   );

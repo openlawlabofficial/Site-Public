@@ -108,6 +108,14 @@ h1, h2, h3 { line-height: 1.2; }
 .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 .project-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
 .project-card a { color: var(--action); text-decoration: none; }
+.empty-state {
+  background: color-mix(in oklab, var(--surface) 92%, var(--secondary));
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  color: var(--muted-text);
+}
+
 .meta { color: var(--muted-text); font-size: 0.95rem; }
 .tag-list { list-style: none; margin: 0.5rem 0 0; padding: 0; display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .tag { background: var(--secondary); color: var(--secondary-foreground); padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.82rem; }
@@ -513,15 +521,6 @@ input:focus, select:focus, button:focus, a:focus { outline: 3px solid var(--ring
   width: 2rem;
   height: 2rem;
   cursor: pointer;
-}
-
-.dialog-image {
-  width: 100%;
-  border-radius: 0.6rem;
-  border: 1px solid var(--border);
-  display: block;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
 }
 
 @keyframes dialog-fade-in {
