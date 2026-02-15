@@ -107,6 +107,7 @@ async function loadProjects() {
     if (!Array.isArray(project.tags)) {
       throw new Error(`Field tags must be an array in ${file}`);
     }
+    project.featured = Boolean(project.featured);
     projects.push(project);
   }
   return projects.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
@@ -163,7 +164,10 @@ async function main() {
         <p>Search and filter projects by title, description, tags, and category.</p>
         <form class="controls" role="search" aria-label="Project search form">
           <label for="search-input">Search projects</label>
-          <input id="search-input" name="q" type="search" placeholder="Search title, tags, description" />
+          <div class="search-popover">
+            <input id="search-input" name="q" type="search" autocomplete="off" placeholder="Search title, tags, description" aria-expanded="false" aria-controls="search-popover-content" aria-autocomplete="list" />
+            <div id="search-popover-content" class="search-popover-content" role="listbox" hidden></div>
+          </div>
           <label for="category-filter">Category</label>
           <select id="category-filter" name="category"><option value="">All categories</option></select>
           <fieldset>
@@ -250,7 +254,8 @@ async function main() {
     full_description: project.full_description,
     tags: project.tags,
     category: project.category || '',
-    updated_at: project.updated_at
+    updated_at: project.updated_at,
+    featured: Boolean(project.featured)
   }));
 
   await writeFile('search-index.json', JSON.stringify(indexData, null, 2));
