@@ -387,6 +387,7 @@ input:focus, select:focus, button:focus, a:focus { outline: 3px solid var(--ring
   letter-spacing: -0.02em;
   display: inline-flex;
   align-items: center;
+  margin-left: 0.12em;
   gap: 0.1em;
   background: linear-gradient(90deg, var(--foreground), var(--muted-foreground), color-mix(in oklab, var(--foreground) 72%, transparent));
   -webkit-background-clip: text;
