@@ -11,6 +11,10 @@ if (!canvas) {
     let width = 0;
     let height = 0;
     let frame = 0;
+    let simulationTime = 0;
+    let lastRenderTime = 0;
+    const MAX_TIMESTEP_SECONDS = 1 / 24;
+    const COMET_SPEED_FACTOR = 0.6;
 
     const blobs = [
       { speed: 0.045, radius: 0.58, offset: 0.0, hue: 32, lightness: 64, alpha: 0.24 },
@@ -31,15 +35,15 @@ if (!canvas) {
       return {
         x: Math.random(),
         y: Math.random(),
-        travelSpeed: 0.008 + Math.random() * 0.018,
+        travelSpeed: (0.008 + Math.random() * 0.018) * COMET_SPEED_FACTOR,
         travelTilt: 0.24 + Math.random() * 0.28,
-        driftSpeed: 0.002 + Math.random() * 0.008,
+        driftSpeed: (0.002 + Math.random() * 0.008) * COMET_SPEED_FACTOR,
         driftAmountX: 0.006 + Math.random() * 0.02,
         driftAmountY: 0.004 + Math.random() * 0.016,
         size: 0.7 + sizeScale * 4.1,
         phase: Math.random() * Math.PI * 2,
         tailLength: 26 + Math.random() * 110,
-        tailPulse: 0.35 + Math.random() * 0.95,
+        tailPulse: (0.35 + Math.random() * 0.95) * (0.72 + Math.random() * 0.2),
         tailAngle: -(0.62 + Math.random() * 0.34),
         color: cometPalette[index % cometPalette.length]
       };
@@ -50,8 +54,8 @@ if (!canvas) {
 
     const getViewport = () => {
       const visualViewport = window.visualViewport;
-      const nextWidth = Math.round(visualViewport?.width || window.innerWidth || document.documentElement.clientWidth || 0);
-      const nextHeight = Math.round(visualViewport?.height || window.innerHeight || document.documentElement.clientHeight || 0);
+      const nextWidth = Math.round(visualViewport?.width || window.innerWidth || document.documentElement.clientWidth || viewportWidth || 0);
+      const nextHeight = Math.round(visualViewport?.height || window.innerHeight || document.documentElement.clientHeight || viewportHeight || 0);
       return { nextWidth, nextHeight };
     };
 
@@ -63,8 +67,8 @@ if (!canvas) {
         viewportWidth = nextWidth;
         viewportHeight = nextHeight;
       } else {
-        const widthChanged = Math.abs(nextWidth - viewportWidth) > 1;
-        const meaningfulHeightChange = Math.abs(nextHeight - viewportHeight) > 96;
+        const widthChanged = nextWidth > 220 && Math.abs(nextWidth - viewportWidth) > 1;
+        const meaningfulHeightChange = nextHeight > 220 && Math.abs(nextHeight - viewportHeight) > 48;
         if (widthChanged) viewportWidth = nextWidth;
         if (meaningfulHeightChange) viewportHeight = nextHeight;
       }
@@ -80,8 +84,12 @@ if (!canvas) {
 
     const drawComet = (comet, timeSeconds) => {
       const progress = (timeSeconds * comet.travelSpeed + comet.phase * 0.12) % 1;
+      const lifecycle = Math.min(progress / 0.16, (1 - progress) / 0.22, 1);
+      const visibility = Math.max(0, lifecycle);
+      if (visibility <= 0) return;
+
       const orbitX = (comet.x + progress * comet.travelTilt) % 1;
-      const orbitY = (comet.y + progress) % 1;
+      const orbitY = -0.16 + progress * 1.34;
       const driftX = Math.sin(timeSeconds * comet.driftSpeed + comet.phase) * width * comet.driftAmountX;
       const driftY = Math.cos(timeSeconds * comet.driftSpeed * 1.25 + comet.phase) * height * comet.driftAmountY;
 
@@ -96,8 +104,9 @@ if (!canvas) {
       const tailX = headX - dirX * tail;
       const tailY = headY - dirY * tail;
 
+      const headAlpha = comet.color.alpha * visibility;
       const gradient = context.createLinearGradient(headX, headY, tailX, tailY);
-      gradient.addColorStop(0, `hsla(${comet.color.hue}, 100%, ${comet.color.lightness}%, ${comet.color.alpha})`);
+      gradient.addColorStop(0, `hsla(${comet.color.hue}, 100%, ${comet.color.lightness}%, ${headAlpha})`);
       gradient.addColorStop(0.26, `hsla(${comet.color.hue}, 92%, ${Math.max(comet.color.lightness - 10, 46)}%, 0.34)`);
       gradient.addColorStop(1, `hsla(${comet.color.hue}, 80%, 30%, 0)`);
 
@@ -112,7 +121,7 @@ if (!canvas) {
       context.stroke();
 
       const headGlow = context.createRadialGradient(headX, headY, 0, headX, headY, comet.size * 9);
-      headGlow.addColorStop(0, `hsla(${comet.color.hue}, 100%, 92%, 0.42)`);
+      headGlow.addColorStop(0, `hsla(${comet.color.hue}, 100%, 92%, ${0.42 * visibility})`);
       headGlow.addColorStop(1, `hsla(${comet.color.hue}, 90%, 70%, 0)`);
       context.fillStyle = headGlow;
       context.beginPath();
@@ -122,7 +131,13 @@ if (!canvas) {
     };
 
     const render = (time) => {
-      const t = time * 0.001;
+      const now = time * 0.001;
+      if (!lastRenderTime) lastRenderTime = now;
+      const delta = Math.min(now - lastRenderTime, MAX_TIMESTEP_SECONDS);
+      lastRenderTime = now;
+      simulationTime += Math.max(delta, 0);
+
+      const t = simulationTime;
       frame = requestAnimationFrame(render);
 
       const gradient = context.createLinearGradient(0, 0, width, height);
