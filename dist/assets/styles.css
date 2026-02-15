@@ -104,6 +104,62 @@ body {
 .nav-list { list-style: none; padding: 0; margin: 0; display: flex; gap: 1rem; }
 .nav-list a { text-decoration: none; color: var(--text); }
 .hero { padding: 3rem 0 1rem; }
+.landing-hero {
+  position: relative;
+  width: 100vw;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  min-height: 120vh;
+  display: grid;
+  align-items: end;
+  overflow: hidden;
+  border-bottom: 1px solid color-mix(in oklab, var(--ring) 25%, transparent);
+}
+.landing-hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.landing-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.12), transparent 45%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.12) 35%, rgba(17, 17, 17, 0.88) 88%, var(--bg) 100%);
+}
+.landing-hero-content {
+  position: relative;
+  z-index: 1;
+  width: min(980px, 92%);
+  margin: 0 auto;
+  padding: 0 0 10vh;
+}
+.landing-hero-content h1 {
+  font-size: clamp(2rem, 6.8vw, 5rem);
+  margin: 0.3rem 0 0.8rem;
+  max-width: 14ch;
+}
+.landing-kicker {
+  margin: 0;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.76rem;
+  color: var(--ring);
+}
+.landing-hero-content > p { max-width: 58ch; }
+.landing-scroll {
+  margin-top: 1rem;
+  color: var(--muted-text);
+  font-size: 0.92rem;
+  animation: landingFloat 2.6s ease-in-out infinite;
+}
+@keyframes landingFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
 h1, h2, h3 { line-height: 1.2; }
 .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 .project-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
@@ -119,10 +175,58 @@ h1, h2, h3 { line-height: 1.2; }
 .meta { color: var(--muted-text); font-size: 0.95rem; }
 .tag-list { list-style: none; margin: 0.5rem 0 0; padding: 0; display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .tag { background: var(--secondary); color: var(--secondary-foreground); padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.82rem; }
-.btn { display: inline-block; background: var(--action); color: var(--primary-foreground); text-decoration: none; padding: 0.6rem 0.9rem; border-radius: 8px; }
+.btn { display: inline-block; background: var(--action); color: var(--primary-foreground); text-decoration: none; padding: 0.6rem 0.9rem; border-radius: 8px; border: 0; cursor: pointer; font: inherit; }
 .btn-secondary { background: var(--secondary); color: var(--secondary-foreground); }
 .cta-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem; }
 .controls { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; display: grid; gap: 0.5rem; margin: 1rem 0; }
+.contact-form { margin: 0; background: transparent; border: 0; padding: 0; max-width: none; }
+.contact-form label { font-size: 0.9rem; color: var(--muted-text); }
+.contact-form .btn { width: 100%; margin-top: 0.25rem; }
+.contact-card {
+  position: relative;
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--surface) 92%, var(--secondary));
+}
+.contact-card-main {
+  padding: 1.4rem;
+  border-bottom: 1px solid var(--border);
+}
+.contact-card-main h1 { margin-top: 0; margin-bottom: 0.6rem; }
+.contact-card-main p { margin-top: 0; color: var(--muted-text); max-width: 62ch; }
+.contact-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.contact-highlights span {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.24rem 0.65rem;
+  font-size: 0.8rem;
+  background: var(--surface);
+  color: var(--secondary-foreground);
+}
+.contact-card-form-wrap {
+  padding: 1.2rem;
+  background: color-mix(in oklab, var(--surface) 88%, #000000);
+}
+@media (min-width: 860px) {
+  .contact-card {
+    grid-template-columns: 1.4fr 1fr;
+    min-height: 420px;
+  }
+  .contact-card-main {
+    border-bottom: 0;
+    border-right: 1px solid var(--border);
+    padding: 2rem;
+  }
+  .contact-card-form-wrap { padding: 2rem; }
+}
 
 
 .rules-box {
@@ -166,7 +270,7 @@ h1, h2, h3 { line-height: 1.2; }
 .search-popover-meta { color: var(--muted-foreground); font-size: 0.82rem; }
 .search-popover-item[aria-selected="true"] .search-popover-meta,
 .search-popover-item:hover .search-popover-meta { color: var(--secondary-foreground); }
-input, select {
+input, select, textarea {
   padding: 0.55rem;
   border: 1px solid var(--border);
   border-radius: 6px;
