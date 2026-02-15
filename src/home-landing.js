@@ -13,29 +13,32 @@ if (!canvas) {
     let frame = 0;
 
     const blobs = [
-      { speed: 0.21, radius: 0.55, offset: 0.0, hue: 204 },
-      { speed: 0.16, radius: 0.45, offset: 1.8, hue: 268 },
-      { speed: 0.12, radius: 0.62, offset: 3.2, hue: 181 },
-      { speed: 0.1, radius: 0.38, offset: 4.6, hue: 228 }
+      { speed: 0.045, radius: 0.58, offset: 0.0, hue: 32, lightness: 64, alpha: 0.24 },
+      { speed: 0.035, radius: 0.46, offset: 1.7, hue: 24, lightness: 56, alpha: 0.18 },
+      { speed: 0.03, radius: 0.66, offset: 3.4, hue: 42, lightness: 58, alpha: 0.16 },
+      { speed: 0.04, radius: 0.4, offset: 5.1, hue: 14, lightness: 52, alpha: 0.15 }
     ];
 
     const cometPalette = [
-      { hue: 188, lightness: 72, alpha: 0.95 },
-      { hue: 226, lightness: 68, alpha: 0.9 },
-      { hue: 276, lightness: 72, alpha: 0.88 },
-      { hue: 198, lightness: 65, alpha: 0.9 }
+      { hue: 33, lightness: 76, alpha: 0.78 },
+      { hue: 24, lightness: 70, alpha: 0.72 },
+      { hue: 18, lightness: 65, alpha: 0.7 },
+      { hue: 42, lightness: 80, alpha: 0.74 }
     ];
 
-    const comets = Array.from({ length: 6 }, (_, index) => {
-      const lane = index / 6;
+    const comets = Array.from({ length: 28 }, (_, index) => {
+      const sizeScale = Math.random();
       return {
-        lane,
-        speed: 0.08 + Math.random() * 0.14,
-        wobble: 0.015 + Math.random() * 0.05,
-        size: 1.4 + Math.random() * 2.3,
+        x: Math.random(),
+        y: Math.random(),
+        driftSpeed: 0.002 + Math.random() * 0.008,
+        driftAmountX: 0.006 + Math.random() * 0.02,
+        driftAmountY: 0.004 + Math.random() * 0.016,
+        size: 0.7 + sizeScale * 4.1,
         phase: Math.random() * Math.PI * 2,
-        startOffset: Math.random(),
-        tailLength: 0.15 + Math.random() * 0.2,
+        tailLength: 26 + Math.random() * 110,
+        tailPulse: 0.35 + Math.random() * 0.95,
+        tailAngle: -(0.62 + Math.random() * 0.34),
         color: cometPalette[index % cometPalette.length]
       };
     });
@@ -52,32 +55,24 @@ if (!canvas) {
     };
 
     const drawComet = (comet, timeSeconds) => {
-      const diagonal = Math.hypot(width, height);
-      const travel = ((timeSeconds * comet.speed + comet.startOffset) % 1 + 1) % 1;
+      const driftX = Math.sin(timeSeconds * comet.driftSpeed + comet.phase) * width * comet.driftAmountX;
+      const driftY = Math.cos(timeSeconds * comet.driftSpeed * 1.25 + comet.phase) * height * comet.driftAmountY;
 
-      const startX = -width * 0.32;
-      const endX = width * 1.15;
-      const startY = height * (0.06 + comet.lane * 0.2);
-      const endY = height * (0.3 + comet.lane * 0.16);
+      const headX = width * comet.x + driftX;
+      const headY = height * (0.08 + comet.y * 0.74) + driftY;
 
-      const wobbleY = Math.sin(timeSeconds * 1.6 + comet.phase) * height * comet.wobble;
-      const headX = startX + (endX - startX) * travel;
-      const headY = startY + (endY - startY) * travel + wobbleY;
-
-      const dx = endX - startX;
-      const dy = endY - startY;
-      const mag = Math.hypot(dx, dy) || 1;
-      const dirX = dx / mag;
-      const dirY = dy / mag;
-
-      const tail = diagonal * comet.tailLength;
+      const tailMotion = 0.66 + Math.sin(timeSeconds * comet.tailPulse + comet.phase) * 0.22;
+      const tail = comet.tailLength * tailMotion;
+      const angle = comet.tailAngle + Math.sin(timeSeconds * comet.tailPulse * 0.42 + comet.phase) * 0.12;
+      const dirX = Math.cos(angle);
+      const dirY = Math.sin(angle);
       const tailX = headX - dirX * tail;
       const tailY = headY - dirY * tail;
 
       const gradient = context.createLinearGradient(headX, headY, tailX, tailY);
       gradient.addColorStop(0, `hsla(${comet.color.hue}, 100%, ${comet.color.lightness}%, ${comet.color.alpha})`);
-      gradient.addColorStop(0.3, `hsla(${comet.color.hue}, 96%, ${Math.max(comet.color.lightness - 8, 50)}%, 0.46)`);
-      gradient.addColorStop(1, `hsla(${comet.color.hue}, 88%, 40%, 0)`);
+      gradient.addColorStop(0.26, `hsla(${comet.color.hue}, 92%, ${Math.max(comet.color.lightness - 10, 46)}%, 0.34)`);
+      gradient.addColorStop(1, `hsla(${comet.color.hue}, 80%, 30%, 0)`);
 
       context.save();
       context.globalCompositeOperation = 'lighter';
@@ -89,9 +84,9 @@ if (!canvas) {
       context.lineTo(headX, headY);
       context.stroke();
 
-      const headGlow = context.createRadialGradient(headX, headY, 0, headX, headY, comet.size * 8);
-      headGlow.addColorStop(0, `hsla(${comet.color.hue}, 100%, 90%, 0.7)`);
-      headGlow.addColorStop(1, `hsla(${comet.color.hue}, 100%, 70%, 0)`);
+      const headGlow = context.createRadialGradient(headX, headY, 0, headX, headY, comet.size * 9);
+      headGlow.addColorStop(0, `hsla(${comet.color.hue}, 100%, 92%, 0.42)`);
+      headGlow.addColorStop(1, `hsla(${comet.color.hue}, 90%, 70%, 0)`);
       context.fillStyle = headGlow;
       context.beginPath();
       context.arc(headX, headY, comet.size * 8, 0, Math.PI * 2);
@@ -104,21 +99,22 @@ if (!canvas) {
       frame = requestAnimationFrame(render);
 
       const gradient = context.createLinearGradient(0, 0, width, height);
-      gradient.addColorStop(0, '#06070b');
-      gradient.addColorStop(0.5, '#121528');
-      gradient.addColorStop(1, '#0b0f1a');
+      gradient.addColorStop(0, '#140d08');
+      gradient.addColorStop(0.42, '#21140d');
+      gradient.addColorStop(0.78, '#16100f');
+      gradient.addColorStop(1, '#0f0d0d');
       context.fillStyle = gradient;
       context.fillRect(0, 0, width, height);
 
       for (const blob of blobs) {
-        const x = width * (0.5 + Math.sin(t * blob.speed + blob.offset) * 0.28);
-        const y = height * (0.42 + Math.cos(t * (blob.speed * 1.4) + blob.offset) * 0.22);
+        const x = width * (0.5 + Math.sin(t * blob.speed + blob.offset) * 0.22);
+        const y = height * (0.4 + Math.cos(t * (blob.speed * 1.2) + blob.offset) * 0.18);
         const r = Math.min(width, height) * blob.radius;
 
         const glow = context.createRadialGradient(x, y, 0, x, y, r);
-        glow.addColorStop(0, `hsla(${blob.hue}, 92%, 62%, 0.28)`);
-        glow.addColorStop(0.4, `hsla(${blob.hue}, 88%, 55%, 0.15)`);
-        glow.addColorStop(1, `hsla(${blob.hue}, 100%, 40%, 0)`);
+        glow.addColorStop(0, `hsla(${blob.hue}, 90%, ${blob.lightness}%, ${blob.alpha})`);
+        glow.addColorStop(0.42, `hsla(${blob.hue}, 84%, ${Math.max(blob.lightness - 10, 40)}%, ${blob.alpha * 0.5})`);
+        glow.addColorStop(1, `hsla(${blob.hue}, 78%, 30%, 0)`);
         context.fillStyle = glow;
         context.fillRect(x - r, y - r, r * 2, r * 2);
       }
