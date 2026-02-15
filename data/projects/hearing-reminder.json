@@ -1,0 +1,14 @@
+{
+  "slug": "hearing-reminder",
+  "title": "Hearing Reminder",
+  "short_description": "Automated hearing reminder templates for client communications.",
+  "full_description": "## Overview\n\nHearing Reminder provides standard multilingual reminders that reduce no-shows and improve preparation outcomes.\n\n### Highlights\n\n- Court-date reminder template library\n- Translation-ready content structure\n- Configurable sending cadence guidance\n",
+  "tags": ["communications", "court", "accessibility"],
+  "category": "Client Support",
+  "github_url": "https://github.com/theopenlawlab/hearing-reminder",
+  "download_url": "https://example.org/downloads/hearing-reminder.zip",
+  "maintainer": "Community Maintainers",
+  "license": "Apache-2.0",
+  "created_at": "2024-06-11",
+  "updated_at": "2025-12-08"
+}

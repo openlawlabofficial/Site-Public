@@ -1,0 +1,14 @@
+{
+  "slug": "doc-intake-checker",
+  "title": "Document Intake Checker",
+  "short_description": "Checklist-driven document quality and completeness validator.",
+  "full_description": "## Overview\n\nDocument Intake Checker helps staff and volunteers identify missing paperwork before filing deadlines.\n\n### Highlights\n\n- Matter-specific document checklists\n- Missing item alerts\n- Progress dashboard-ready output\n",
+  "tags": ["documents", "checklists", "workflow"],
+  "category": "Case Preparation",
+  "github_url": "https://github.com/theopenlawlab/doc-intake-checker",
+  "download_url": "https://example.org/downloads/doc-intake-checker.zip",
+  "maintainer": ["Justice Tech Contributors", "OpenLawLab"],
+  "license": "GPL-3.0",
+  "created_at": "2023-11-03",
+  "updated_at": "2026-02-02"
+}
