@@ -167,6 +167,87 @@ input, select {
 }
 input:focus, select:focus, button:focus, a:focus { outline: 3px solid var(--ring); outline-offset: 2px; }
 .tag-filter { display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; }
+
+
+.tag-input-shell {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.tag-token-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.4rem;
+  background: var(--surface);
+}
+
+.tag-token {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 1.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 0.25rem 0 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--background);
+}
+
+.tag-token-remove {
+  border: 0;
+  background: transparent;
+  color: var(--muted-text);
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.tag-token-remove:hover {
+  color: var(--text);
+  background: var(--secondary);
+}
+
+.tag-filter-input {
+  border: 0;
+  background: transparent;
+  min-width: 10rem;
+  flex: 1;
+  padding: 0.25rem;
+}
+
+.tag-filter-input:focus {
+  outline: none;
+}
+
+.tag-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tag-suggestion {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.22rem 0.6rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.tag-suggestion:hover {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
 .pagination { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1rem; }
 .pagination button { border: 1px solid var(--border); background: var(--surface); padding: 0.4rem 0.7rem; border-radius: 6px; }
 .pagination button[aria-current="page"] { background: var(--secondary); border-color: var(--ring); color: var(--secondary-foreground); }
