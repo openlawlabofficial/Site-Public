@@ -133,7 +133,13 @@ h1, h2, h3 { line-height: 1.2; }
 .search-popover-meta { color: var(--muted-foreground); font-size: 0.82rem; }
 .search-popover-item[aria-selected="true"] .search-popover-meta,
 .search-popover-item:hover .search-popover-meta { color: var(--secondary-foreground); }
-input, select { padding: 0.55rem; border: 1px solid var(--border); border-radius: 6px; }
+input, select {
+  padding: 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+}
 input:focus, select:focus, button:focus, a:focus { outline: 3px solid var(--ring); outline-offset: 2px; }
 .tag-filter { display: flex; flex-wrap: wrap; gap: 0.5rem 0.8rem; }
 .pagination { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1rem; }
