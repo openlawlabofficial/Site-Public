@@ -201,7 +201,7 @@ input:focus, select:focus, button:focus, a:focus { outline: 3px solid var(--ring
   border-top: 1px solid var(--border);
   position: relative;
   overflow: hidden;
-  transform: translateY(calc((1 - var(--footer-reveal)) * 22vh));
+  transform: translateY(calc((1 - var(--footer-reveal)) * 100vh));
 }
 
 .sticky-footer-panel::before {
