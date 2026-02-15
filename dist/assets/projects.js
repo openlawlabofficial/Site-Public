@@ -35,7 +35,7 @@ const sortResults = (items) => {
   sorted.sort((a, b) => {
     if (a.featured !== b.featured) return a.featured ? -1 : 1;
     if (sort === 'alphabetical') return a.title.localeCompare(b.title);
-    return b.updated_at.localeCompare(a.updated_at);
+    return b.lastupdate.localeCompare(a.lastupdate);
   });
 
   return sorted;
@@ -44,7 +44,14 @@ const sortResults = (items) => {
 const fuzzyMatch = (project, query) => {
   if (!query) return true;
   const q = query.toLowerCase();
-  const haystack = [project.title, project.short_description, project.full_description, project.tags.join(' ')]
+  const haystack = [
+    project.title,
+    project.overview,
+    project.highlights.join(' '),
+    project.states_and_territories.join(' '),
+    project.topic,
+    project.legal_area
+  ]
     .join(' ')
     .toLowerCase();
   return haystack.includes(q) || q.split(/\s+/).every((part) => haystack.includes(part));
@@ -60,10 +67,12 @@ const renderCards = () => {
     .map(
       (project) => `<article class="project-card">
       <h2><a href="/projects/${project.slug}/">${project.title}</a></h2>
-      <p>${project.short_description}</p>
-      <p class="meta"><strong>Category:</strong> ${project.category || 'General'}</p>
-      <p class="meta"><strong>Updated:</strong> ${new Date(project.updated_at + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}</p>
-      <ul class="tag-list">${project.tags.map((tag) => `<li class="tag">${tag}</li>`).join('')}</ul>
+      <p>${project.overview}</p>
+      <p class="meta"><strong>Topic:</strong> ${project.topic || 'General'}</p>
+      <p class="meta"><strong>Legal Area:</strong> ${project.legal_area || 'General'}</p>
+      <p class="meta"><strong>Project Type:</strong> ${project.project_type}</p>
+      <p class="meta"><strong>Updated:</strong> ${new Date(project.lastupdate + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}</p>
+      <ul class="tag-list">${project.states_and_territories.map((item) => `<li class="tag">${item}</li>`).join('')}</ul>
       </article>`
     )
     .join('');
@@ -106,7 +115,7 @@ const renderSearchPopover = () => {
       const isActive = index === state.activeSuggestion;
       return `<button type="button" class="search-popover-item" data-suggestion-index="${index}" role="option" aria-selected="${isActive ? 'true' : 'false'}">
         <span class="search-popover-title">${project.title}</span>
-        <span class="search-popover-meta">${project.category || 'General'}${project.featured ? ' • Featured' : ''}</span>
+        <span class="search-popover-meta">${project.topic || 'General'}${project.featured ? ' • Featured' : ''}</span>
       </button>`;
     })
     .join('');
@@ -120,8 +129,8 @@ const applyFilters = () => {
   const tags = Array.from(els.tagFilter.querySelectorAll('input:checked')).map((input) => input.value);
 
   let filtered = state.projects.filter((project) => fuzzyMatch(project, query));
-  if (category) filtered = filtered.filter((project) => project.category === category);
-  if (tags.length) filtered = filtered.filter((project) => tags.every((tag) => project.tags.includes(tag)));
+  if (category) filtered = filtered.filter((project) => project.topic === category);
+  if (tags.length) filtered = filtered.filter((project) => tags.every((tag) => project.states_and_territories.includes(tag)));
 
   state.filtered = sortResults(filtered);
   state.previewResults = state.filtered;
@@ -134,8 +143,8 @@ async function init() {
   const response = await fetch('/search-index.json');
   state.projects = await response.json();
 
-  const categories = [...new Set(state.projects.map((project) => project.category).filter(Boolean))].sort();
-  const tags = [...new Set(state.projects.flatMap((project) => project.tags))].sort();
+  const categories = [...new Set(state.projects.map((project) => project.topic).filter(Boolean))].sort();
+  const tags = [...new Set(state.projects.flatMap((project) => project.states_and_territories))].sort();
 
   els.categoryFilter.insertAdjacentHTML('beforeend', categories.map((c) => `<option value="${c}">${c}</option>`).join(''));
   els.tagFilter.innerHTML = tags.map((tag) => `<label><input type="checkbox" value="${tag}" /> ${tag}</label>`).join('');

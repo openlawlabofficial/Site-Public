@@ -1,44 +1,58 @@
 [
   {
-    "slug": "doc-intake-checker",
-    "title": "Document Intake Checker",
-    "short_description": "Checklist-driven document quality and completeness validator.",
-    "full_description": "## Overview\n\nDocument Intake Checker helps staff and volunteers identify missing paperwork before filing deadlines.\n\n### Highlights\n\n- Matter-specific document checklists\n- Missing item alerts\n- Progress dashboard-ready output\n",
-    "tags": [
-      "documents",
-      "checklists",
-      "workflow"
-    ],
-    "category": "Case Preparation",
-    "updated_at": "2026-02-02",
-    "featured": true
-  },
-  {
     "slug": "caseflow-optimizer",
     "title": "Caseflow Optimizer",
-    "short_description": "A triage and case routing tool for legal aid intake teams.",
-    "full_description": "## Overview\n\nCaseflow Optimizer helps legal aid clinics route requests to the right support track quickly.\n\n### Highlights\n\n- Rules-based intake categorization\n- Priority scoring for urgent matters\n- Exportable reports for weekly operations\n",
-    "tags": [
-      "intake",
-      "triage",
-      "legal-aid"
+    "overview": "Caseflow Optimizer helps legal aid clinics route requests to the right support track quickly.",
+    "highlights": [
+      "Rules-based intake categorization",
+      "Priority scoring for urgent matters",
+      "Exportable reports for weekly operations"
     ],
-    "category": "Operations",
-    "updated_at": "2026-01-12",
+    "states_and_territories": [
+      "California",
+      "New York"
+    ],
+    "topic": "Operations",
+    "legal_area": "Civil Legal Aid",
+    "project_type": "repository",
+    "lastupdate": "2026-01-12",
     "featured": true
   },
   {
     "slug": "hearing-reminder",
     "title": "Hearing Reminder",
-    "short_description": "Automated hearing reminder templates for client communications.",
-    "full_description": "## Overview\n\nHearing Reminder provides standard multilingual reminders that reduce no-shows and improve preparation outcomes.\n\n### Highlights\n\n- Court-date reminder template library\n- Translation-ready content structure\n- Configurable sending cadence guidance\n",
-    "tags": [
-      "communications",
-      "court",
-      "accessibility"
+    "overview": "Hearing Reminder provides standard multilingual reminders that reduce no-shows and improve preparation outcomes.",
+    "highlights": [
+      "Court-date reminder template library",
+      "Translation-ready content structure",
+      "Configurable sending cadence guidance"
     ],
-    "category": "Client Support",
-    "updated_at": "2025-12-08",
+    "states_and_territories": [
+      "Puerto Rico"
+    ],
+    "topic": "Client Communication",
+    "legal_area": "Family Law",
+    "project_type": "file",
+    "lastupdate": "2025-12-16",
+    "featured": true
+  },
+  {
+    "slug": "doc-intake-checker",
+    "title": "Document Intake Checker",
+    "overview": "Document Intake Checker helps staff and volunteers identify missing paperwork before filing deadlines.",
+    "highlights": [
+      "Matter-specific document checklists",
+      "Missing item alerts",
+      "Progress dashboard-ready output"
+    ],
+    "states_and_territories": [
+      "Texas",
+      "Florida"
+    ],
+    "topic": "Intake",
+    "legal_area": "Housing",
+    "project_type": "repository",
+    "lastupdate": "2025-11-02",
     "featured": false
   }
 ]

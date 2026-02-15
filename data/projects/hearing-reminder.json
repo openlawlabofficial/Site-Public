@@ -1,19 +1,21 @@
 {
   "slug": "hearing-reminder",
   "title": "Hearing Reminder",
-  "short_description": "Automated hearing reminder templates for client communications.",
-  "full_description": "## Overview\n\nHearing Reminder provides standard multilingual reminders that reduce no-shows and improve preparation outcomes.\n\n### Highlights\n\n- Court-date reminder template library\n- Translation-ready content structure\n- Configurable sending cadence guidance\n",
-  "tags": [
-    "communications",
-    "court",
-    "accessibility"
+  "overview": "Hearing Reminder provides standard multilingual reminders that reduce no-shows and improve preparation outcomes.",
+  "highlights": [
+    "Court-date reminder template library",
+    "Translation-ready content structure",
+    "Configurable sending cadence guidance"
   ],
-  "category": "Client Support",
-  "github_url": "https://github.com/theopenlawlab/hearing-reminder",
-  "download_url": "https://example.org/downloads/hearing-reminder.zip",
-  "maintainer": "Community Maintainers",
-  "license": "Apache-2.0",
-  "created_at": "2024-06-11",
-  "updated_at": "2025-12-08",
-  "featured": false
+  "author": "",
+  "topic": "Client Communication",
+  "legal_area": "Family Law",
+  "project_type": "file",
+  "file_url": "https://example.org/downloads/hearing-reminder-guide.pdf",
+  "states_and_territories": [
+    "Puerto Rico"
+  ],
+  "full_description": "Hearing Reminder offers reusable communication templates that legal aid teams can adapt for reminders and preparation instructions.",
+  "featured": true,
+  "lastupdate": "2025-12-16"
 }
