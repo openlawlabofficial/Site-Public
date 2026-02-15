@@ -31,6 +31,8 @@ if (!canvas) {
       return {
         x: Math.random(),
         y: Math.random(),
+        travelSpeed: 0.008 + Math.random() * 0.018,
+        travelTilt: 0.24 + Math.random() * 0.28,
         driftSpeed: 0.002 + Math.random() * 0.008,
         driftAmountX: 0.006 + Math.random() * 0.02,
         driftAmountY: 0.004 + Math.random() * 0.016,
@@ -43,10 +45,32 @@ if (!canvas) {
       };
     });
 
+    let viewportWidth = 0;
+    let viewportHeight = 0;
+
+    const getViewport = () => {
+      const visualViewport = window.visualViewport;
+      const nextWidth = Math.round(visualViewport?.width || window.innerWidth || document.documentElement.clientWidth || 0);
+      const nextHeight = Math.round(visualViewport?.height || window.innerHeight || document.documentElement.clientHeight || 0);
+      return { nextWidth, nextHeight };
+    };
+
     const resize = () => {
       const ratio = Math.max(window.devicePixelRatio || 1, 1);
-      width = window.innerWidth;
-      height = Math.max(window.innerHeight * 1.2, 560);
+      const { nextWidth, nextHeight } = getViewport();
+
+      if (!viewportWidth || !viewportHeight) {
+        viewportWidth = nextWidth;
+        viewportHeight = nextHeight;
+      } else {
+        const widthChanged = Math.abs(nextWidth - viewportWidth) > 1;
+        const meaningfulHeightChange = Math.abs(nextHeight - viewportHeight) > 96;
+        if (widthChanged) viewportWidth = nextWidth;
+        if (meaningfulHeightChange) viewportHeight = nextHeight;
+      }
+
+      width = viewportWidth;
+      height = Math.max(viewportHeight * 1.2, 560);
       canvas.width = Math.floor(width * ratio);
       canvas.height = Math.floor(height * ratio);
       canvas.style.width = `${width}px`;
@@ -55,11 +79,14 @@ if (!canvas) {
     };
 
     const drawComet = (comet, timeSeconds) => {
+      const progress = (timeSeconds * comet.travelSpeed + comet.phase * 0.12) % 1;
+      const orbitX = (comet.x + progress * comet.travelTilt) % 1;
+      const orbitY = (comet.y + progress) % 1;
       const driftX = Math.sin(timeSeconds * comet.driftSpeed + comet.phase) * width * comet.driftAmountX;
       const driftY = Math.cos(timeSeconds * comet.driftSpeed * 1.25 + comet.phase) * height * comet.driftAmountY;
 
-      const headX = width * comet.x + driftX;
-      const headY = height * (0.08 + comet.y * 0.74) + driftY;
+      const headX = width * orbitX + driftX;
+      const headY = height * (0.08 + orbitY * 0.74) + driftY;
 
       const tailMotion = 0.66 + Math.sin(timeSeconds * comet.tailPulse + comet.phase) * 0.22;
       const tail = comet.tailLength * tailMotion;
@@ -132,7 +159,18 @@ if (!canvas) {
     };
 
     resize();
-    window.addEventListener('resize', resize);
+    let resizeQueued = false;
+    const queueResize = () => {
+      if (resizeQueued) return;
+      resizeQueued = true;
+      requestAnimationFrame(() => {
+        resizeQueued = false;
+        resize();
+      });
+    };
+
+    window.addEventListener('resize', queueResize, { passive: true });
+    window.visualViewport?.addEventListener('resize', queueResize, { passive: true });
     frame = requestAnimationFrame(render);
 
     window.addEventListener('beforeunload', () => cancelAnimationFrame(frame), { once: true });
