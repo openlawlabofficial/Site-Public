@@ -57,7 +57,7 @@ const footerData = {
     { href: 'https://github.com', label: 'GitHub', icon: 'G' },
     { href: 'https://www.linkedin.com', label: 'LinkedIn', icon: 'L' }
   ],
-  title: 'Open Law',
+  title: 'The Open Law Lab',
   subtitle: 'Open-source legal infrastructure for everyone',
   copyright: `©${new Date().getUTCFullYear()} TheOpenLawLab. All rights reserved.`
 };
@@ -118,6 +118,11 @@ const brandIcon = `<svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" vi
   </g>
 </svg>`;
 
+const footerTitle = footerData.title.replace(
+  'O',
+  `<span class="sticky-footer-title-icon" aria-hidden="true">${brandIcon}</span><span class="sr-only">O</span>`
+);
+
 const layout = ({ title, description, canonicalPath, content }) => `<!doctype html>
 <html lang="en">
   <head>
@@ -170,7 +175,7 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
             </div>
             <div class="sticky-footer-bottom" data-footer-item style="--footer-item-delay:0.32s">
               <div>
-            <p class="sticky-footer-title">${esc(footerData.title)}</p>
+            <p class="sticky-footer-title">${footerTitle}</p>
             <p class="sticky-footer-subtitle">${esc(footerData.subtitle)}</p>
               </div>
               <div class="sticky-footer-meta">

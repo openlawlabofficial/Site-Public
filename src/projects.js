@@ -14,7 +14,10 @@ const state = {
   filtered: [],
   previewResults: [],
   page: 1,
-  activeSuggestion: -1
+  activeSuggestion: -1,
+  allTags: [],
+  selectedTags: [],
+  tagInputValue: ''
 };
 
 const els = {
@@ -123,10 +126,55 @@ const renderSearchPopover = () => {
   openSearchPopover();
 };
 
+const getTagSuggestions = () => {
+  const query = state.tagInputValue.trim().toLowerCase();
+  return state.allTags
+    .filter((tag) => !state.selectedTags.includes(tag))
+    .filter((tag) => !query || tag.toLowerCase().includes(query))
+    .slice(0, 8);
+};
+
+const addTag = (rawTag) => {
+  const incoming = rawTag.trim().toLowerCase();
+  if (!incoming) return;
+
+  const canonicalTag = state.allTags.find((tag) => tag.toLowerCase() === incoming);
+  if (!canonicalTag) return;
+  if (state.selectedTags.includes(canonicalTag)) return;
+
+  state.selectedTags.push(canonicalTag);
+  state.tagInputValue = '';
+  renderTagInput();
+  applyFilters();
+};
+
+const removeTag = (tag) => {
+  state.selectedTags = state.selectedTags.filter((entry) => entry !== tag);
+  renderTagInput();
+  applyFilters();
+};
+
+const renderTagInput = () => {
+  const selected = state.selectedTags
+    .map(
+      (tag) => `<span class="tag-token">${tag}<button type="button" class="tag-token-remove" data-remove-tag="${tag}" aria-label="Remove ${tag} tag">×</button></span>`
+    )
+    .join('');
+
+  const suggestions = getTagSuggestions()
+    .map((tag) => `<button type="button" class="tag-suggestion" data-add-tag="${tag}">${tag}</button>`)
+    .join('');
+
+  els.tagFilter.innerHTML = `<div class="tag-input-shell">
+      <div class="tag-token-list">${selected}<input id="tag-filter-input" class="tag-filter-input" type="text" value="${state.tagInputValue}" placeholder="Add a tag" aria-label="Add a tag filter" /></div>
+      <div class="tag-suggestions" ${suggestions ? '' : 'hidden'}>${suggestions}</div>
+    </div>`;
+};
+
 const applyFilters = () => {
   const query = els.searchInput.value.trim();
   const category = els.categoryFilter.value;
-  const tags = Array.from(els.tagFilter.querySelectorAll('input:checked')).map((input) => input.value);
+  const tags = state.selectedTags;
 
   let filtered = state.projects.filter((project) => fuzzyMatch(project, query));
   if (category) filtered = filtered.filter((project) => project.topic === category);
@@ -143,11 +191,12 @@ async function init() {
   const response = await fetch('/search-index.json');
   state.projects = await response.json();
 
-  const categories = [...new Set(state.projects.map((project) => project.topic).filter(Boolean))].sort();
-  const tags = [...new Set(state.projects.flatMap((project) => project.states_and_territories))].sort();
+  const categories = [...new Set(state.projects.map((project) => project.category).filter(Boolean))].sort();
+  const tags = [...new Set(state.projects.flatMap((project) => project.tags))].sort();
+  state.allTags = tags;
 
   els.categoryFilter.insertAdjacentHTML('beforeend', categories.map((c) => `<option value="${c}">${c}</option>`).join(''));
-  els.tagFilter.innerHTML = tags.map((tag) => `<label><input type="checkbox" value="${tag}" /> ${tag}</label>`).join('');
+  renderTagInput();
 
   const debouncedFilter = debounce(applyFilters, 220);
   els.searchInput.addEventListener('input', debouncedFilter);
@@ -192,7 +241,38 @@ async function init() {
 
   els.categoryFilter.addEventListener('change', applyFilters);
   els.sortBy.addEventListener('change', applyFilters);
-  els.tagFilter.addEventListener('change', applyFilters);
+  els.tagFilter.addEventListener('input', (event) => {
+    const input = event.target.closest('#tag-filter-input');
+    if (!input) return;
+    state.tagInputValue = input.value;
+    renderTagInput();
+  });
+  els.tagFilter.addEventListener('keydown', (event) => {
+    const input = event.target.closest('#tag-filter-input');
+    if (!input) return;
+
+    if (event.key === 'Enter' || event.key === ',') {
+      event.preventDefault();
+      addTag(input.value);
+      return;
+    }
+
+    if (event.key === 'Backspace' && !input.value && state.selectedTags.length) {
+      removeTag(state.selectedTags[state.selectedTags.length - 1]);
+    }
+  });
+  els.tagFilter.addEventListener('click', (event) => {
+    const addButton = event.target.closest('button[data-add-tag]');
+    if (addButton) {
+      addTag(addButton.dataset.addTag);
+      return;
+    }
+
+    const removeButton = event.target.closest('button[data-remove-tag]');
+    if (removeButton) {
+      removeTag(removeButton.dataset.removeTag);
+    }
+  });
   els.pagination.addEventListener('click', (event) => {
     const button = event.target.closest('button[data-page]');
     if (!button) return;
