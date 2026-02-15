@@ -4,14 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Contribute | TheOpenLawLab</title>
-    <meta name="description" content="Contributing to TheOpenLawLab will be documented here soon." />
+    <meta name="description" content="Learn how to submit projects, volunteer, or donate to support TheOpenLawLab." />
     <meta property="og:title" content="Contribute | TheOpenLawLab" />
-    <meta property="og:description" content="Contributing to TheOpenLawLab will be documented here soon." />
+    <meta property="og:description" content="Learn how to submit projects, volunteer, or donate to support TheOpenLawLab." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://theopenlawlab.org/contribute/" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Contribute | TheOpenLawLab" />
-    <meta name="twitter:description" content="Contributing to TheOpenLawLab will be documented here soon." />
+    <meta name="twitter:description" content="Learn how to submit projects, volunteer, or donate to support TheOpenLawLab." />
     <link rel="canonical" href="https://theopenlawlab.org/contribute/" />
     <link rel="stylesheet" href="/assets/styles.css" />
   </head>
@@ -31,8 +31,70 @@
     </header>
     <main id="main" class="shell"><section>
         <h1>Contribute</h1>
-        <p>This page is a placeholder for contribution guidelines, onboarding, and project proposal workflows.</p>
+        <p>Contribution at TheOpenLawLab includes <strong>submission + verification</strong>, <strong>volunteering</strong>, and <strong>donation</strong>.</p>
+        <div class="grid">
+          <article class="project-card">
+            <h2><a href="/contribute/submit/">Submit a Project</a></h2>
+            <p>Share a project for verification and potential publication on the site.</p>
+          </article>
+          <article class="project-card">
+            <h2><a href="/contribute/volunteer/">Volunteer</a></h2>
+            <p>Apply to support reviews and development after you have a verified submission.</p>
+          </article>
+          <article class="project-card">
+            <h2><a href="/contribute/donate/">Donate</a></h2>
+            <p>Help sustain open legal-aid infrastructure through financial support.</p>
+          </article>
+        </div>
+
+        <h2>How submissions work</h2>
+        <ul>
+          <li>To submit a new project, contact us with a GitHub link (if code), the document (if documentation), or a clear outline of the project scope.</li>
+          <li>If your project passes verification, it will be added to the site.</li>
+          <li>If your project does not pass verification, our team will try to provide feedback and support so you can improve and resubmit.</li>
+          <li>If you have a previously verified project, you can submit an application to become a volunteer reviewer or builder.</li>
+          <li>Submissions are partially anonymous to the public; you may use a first name or pseudonym.</li>
+        </ul>
+
+        <h2>Submission rules</h2>
+        <div class="rules-box">
+          <h3>Security</h3>
+          <p>Local-only systems are preferred. If a system is networked, it must be secure, especially when handling sensitive information.</p>
+          <ul>
+            <li>Row-level security and encryption for sensitive data</li>
+            <li>API security and authentication controls</li>
+            <li>Basic protections and hardened defaults</li>
+            <li>OAuth support where applicable</li>
+            <li>SQL injection prevention and secure query patterns</li>
+          </ul>
+
+          <h3>Interoperability</h3>
+          <p>All systems must be open source and should support straightforward data transfer in and out, so no single ecosystem is enforced.</p>
+          <ul>
+            <li>CSV information load</li>
+            <li>Import and export capacity</li>
+            <li>DOCX and PDF output</li>
+            <li>Comments: projects are easiest to iterate on when comments are consistent, simple, and clarifying.</li>
+          </ul>
+
+          <h3>Value</h3>
+          <p>Systems should provide distinct value through significantly better quality/cost or by serving an important niche purpose. If a system no longer has a distinct role, or has been outcompeted on the platform, it may be retired.</p>
+
+          <h3>Elegance</h3>
+          <p>Systems should solve their target problem in a direct and efficient way.</p>
+        </div>
+
+        <h3>Vibe-coding and AI-assisted code</h3>
+        <p>AI-assisted contributions are welcome. We recognize that they can make contributing significantly easier and faster, and we support their responsible use.</p>
+        <ul>
+          <li>We generally recommend IDE-based AI assistance, and we also accept work created with coding agents like Claude Code, Codex, and similar tools.</li>
+          <li>We discourage full-stack one-shot generators (for example Lovable or Bolt) when output is not meaningfully reviewed by a contributor.</li>
+          <li>Coding agents can produce bloated or inefficient implementations if edits are not reviewed carefully. Please review generated code for size, relevance, and maintainability.</li>
+          <li>Some inefficiency is acceptable, but submissions should remain practical for iteration and review, not excessively large, unstructured code dumps.</li>
+          <li>As long as the code is reviewable, follows the project rules, and works well, we are flexible about how much was written by an agent.</li>
+          <li>We especially encourage using agents for code review support and for improving or standardizing comments.</li>
+        </ul>
       </section></main>
-    <footer class="site-footer shell">Open-source tools for legal aid operations.</footer>
+    <footer class="site-footer shell">TheOpenLawLab</footer>
   </body>
 </html>
