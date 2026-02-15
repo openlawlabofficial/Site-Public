@@ -129,9 +129,38 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
             <li><a href="/contribute/">Contribute</a></li>
           </ul>
         </nav>
+        <button class="btn btn-secondary btn-compact" type="button" data-dialog-trigger>Open Dialog</button>
       </div>
     </header>
     <main id="main" class="shell">${content}</main>
+
+    <div class="dialog-root" data-dialog-root hidden>
+      <div class="dialog-overlay" data-dialog-overlay></div>
+      <section
+        class="dialog-content"
+        data-dialog-content
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dialog-title"
+        aria-describedby="dialog-description"
+        tabindex="-1"
+      >
+        <button class="dialog-close" type="button" data-dialog-close aria-label="Close dialog">
+          ×
+        </button>
+        <div class="dialog-header">
+          <h2 id="dialog-title">Dialog</h2>
+          <p id="dialog-description">An example modal with dotted overlay, blur, keyboard support, and close controls.</p>
+        </div>
+        <img
+          class="dialog-image"
+          src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=80"
+          alt="Team collaborating around a laptop"
+          loading="lazy"
+        />
+      </section>
+    </div>
+
     <footer class="sticky-footer" aria-label="Site footer" data-sticky-footer>
       <div class="sticky-footer-clip">
         <div class="sticky-footer-track">
@@ -170,6 +199,7 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
         </div>
       </div>
     </footer>
+    <script type="module" src="/assets/modal.js"></script>
     <script type="module" src="/assets/footer-motion.js"></script>
   </body>
 </html>`;
@@ -238,6 +268,7 @@ async function main() {
   await writeFile('assets/styles.css', await fs.readFile(path.join(root, 'src/styles.css'), 'utf8'));
   await writeFile('assets/projects.js', await fs.readFile(path.join(root, 'src/projects.js'), 'utf8'));
   await writeFile('assets/footer-motion.js', await fs.readFile(path.join(root, 'src/footer-motion.js'), 'utf8'));
+  await writeFile('assets/modal.js', await fs.readFile(path.join(root, 'src/modal.js'), 'utf8'));
   await writeFile('assets/brand-icon.svg', await fs.readFile(path.join(root, 'src/assets/brand-icon.svg'), 'utf8'));
   await writeFile('assets/footer-o-icon.svg', await fs.readFile(path.join(root, 'src/assets/footer-o-icon.svg'), 'utf8'));
 
