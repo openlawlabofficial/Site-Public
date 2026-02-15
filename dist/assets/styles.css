@@ -453,3 +453,89 @@ input:focus, select:focus, button:focus, a:focus { outline: 3px solid var(--ring
     text-align: left;
   }
 }
+
+.dialog-open {
+  overflow: hidden;
+}
+
+.btn-compact {
+  padding: 0.42rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.dialog-root {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+}
+
+.dialog-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(transparent 1px, rgb(0 0 0 / 0.82) 1px);
+  background-size: 4px 4px;
+  backdrop-filter: brightness(1.2) blur(3px);
+  animation: dialog-fade-in 160ms ease-out;
+}
+
+.dialog-content {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 32rem);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--card);
+  padding: 1rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+  display: grid;
+  gap: 0.8rem;
+  animation: dialog-zoom-in 180ms cubic-bezier(.22,.61,.36,1);
+}
+
+.dialog-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.dialog-header p {
+  margin: 0.4rem 0 0;
+  color: var(--muted-text);
+}
+
+.dialog-close {
+  justify-self: end;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--foreground);
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+}
+
+.dialog-image {
+  width: 100%;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border);
+  display: block;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+@keyframes dialog-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dialog-zoom-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
