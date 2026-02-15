@@ -51,6 +51,9 @@ if (!canvas) {
 
     let viewportWidth = 0;
     let viewportHeight = 0;
+    const hasTouchInput = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+    let touchInteractionActive = false;
+    let touchResizePending = false;
 
     const getViewport = () => {
       const visualViewport = window.visualViewport;
@@ -68,9 +71,17 @@ if (!canvas) {
         viewportHeight = nextHeight;
       } else {
         const widthChanged = nextWidth > 220 && Math.abs(nextWidth - viewportWidth) > 1;
-        const meaningfulHeightChange = nextHeight > 220 && Math.abs(nextHeight - viewportHeight) > 48;
+        const heightDelta = nextHeight - viewportHeight;
+        const meaningfulHeightChange = nextHeight > 220 && Math.abs(heightDelta) > 48;
+
+        // iOS Safari toolbar changes can continuously nudge viewport height while scrolling.
+        // For touch devices, ignore small/mid downward changes so comet positions stay stable.
+        const shouldApplyHeightChange = hasTouchInput
+          ? (heightDelta >= 24 || (Math.abs(heightDelta) > 160 && widthChanged))
+          : meaningfulHeightChange;
+
         if (widthChanged) viewportWidth = nextWidth;
-        if (meaningfulHeightChange) viewportHeight = nextHeight;
+        if (shouldApplyHeightChange) viewportHeight = nextHeight;
       }
 
       width = viewportWidth;
@@ -180,14 +191,42 @@ if (!canvas) {
       resizeQueued = true;
       requestAnimationFrame(() => {
         resizeQueued = false;
+        if (touchInteractionActive) {
+          touchResizePending = true;
+          return;
+        }
         resize();
       });
     };
 
+    const onTouchStart = () => {
+      touchInteractionActive = true;
+    };
+
+    const onTouchEnd = () => {
+      touchInteractionActive = false;
+      if (touchResizePending) {
+        touchResizePending = false;
+        queueResize();
+      }
+    };
+
     window.addEventListener('resize', queueResize, { passive: true });
     window.visualViewport?.addEventListener('resize', queueResize, { passive: true });
+    if (hasTouchInput) {
+      window.addEventListener('touchstart', onTouchStart, { passive: true });
+      window.addEventListener('touchend', onTouchEnd, { passive: true });
+      window.addEventListener('touchcancel', onTouchEnd, { passive: true });
+    }
     frame = requestAnimationFrame(render);
 
-    window.addEventListener('beforeunload', () => cancelAnimationFrame(frame), { once: true });
+    window.addEventListener('beforeunload', () => {
+      cancelAnimationFrame(frame);
+      if (hasTouchInput) {
+        window.removeEventListener('touchstart', onTouchStart);
+        window.removeEventListener('touchend', onTouchEnd);
+        window.removeEventListener('touchcancel', onTouchEnd);
+      }
+    }, { once: true });
   }
 }
