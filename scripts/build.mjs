@@ -79,7 +79,7 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
       </div>
     </header>
     <main id="main" class="shell">${content}</main>
-    <footer class="site-footer shell">Open-source tools for legal aid operations.</footer>
+    <footer class="site-footer shell">TheOpenLawLab</footer>
   </body>
 </html>`;
 
@@ -220,6 +220,15 @@ async function main() {
       canonicalPath: '/about/',
       content: `<section>
         <h1>About TheOpenLawLab</h1>
+        <p><strong>Open-source tools for legal aid operations.</strong></p>
+        <h2>Our Mission</h2>
+        <p>Our mission is to provide free, open-source, high-quality solutions for legal problems, whether broad or highly specific, created by and for the public-interest community.</p>
+        <ul>
+          <li><strong>Free and open source:</strong> Every project is intended to be transparent, reusable, and adaptable by legal-aid practitioners and civic technologists.</li>
+          <li><strong>Quality solutions:</strong> We prioritize reliability and usability so tools are practical in real legal workflows, not just prototypes.</li>
+          <li><strong>Made by anyone:</strong> Contributions are welcome from developers, legal workers, researchers, and community members with lived experience.</li>
+          <li><strong>Legal aid + systems:</strong> We focus on the intersection of direct legal support and systems design, so improvements can scale and serve more people.</li>
+        </ul>
         <h2>Mission statement</h2>
         <p>Our mission is to build open digital infrastructure that strengthens legal aid systems and improves access to justice through structural efficiency.</p>
         <h2>What we build</h2>
@@ -238,11 +247,125 @@ async function main() {
     'contribute/index.html',
     layout({
       title: 'Contribute | TheOpenLawLab',
-      description: 'Contributing to TheOpenLawLab will be documented here soon.',
+      description: 'Learn how to submit projects, volunteer, or donate to support TheOpenLawLab.',
       canonicalPath: '/contribute/',
       content: `<section>
         <h1>Contribute</h1>
-        <p>This page is a placeholder for contribution guidelines, onboarding, and project proposal workflows.</p>
+        <p>Contribution at TheOpenLawLab includes <strong>submission + verification</strong>, <strong>volunteering</strong>, and <strong>donation</strong>.</p>
+        <div class="grid">
+          <article class="project-card">
+            <h2><a href="/contribute/submit/">Submit a Project</a></h2>
+            <p>Share a project for verification and potential publication on the site.</p>
+          </article>
+          <article class="project-card">
+            <h2><a href="/contribute/volunteer/">Volunteer</a></h2>
+            <p>Apply to support reviews and development after you have a verified submission.</p>
+          </article>
+          <article class="project-card">
+            <h2><a href="/contribute/donate/">Donate</a></h2>
+            <p>Help sustain open legal-aid infrastructure through financial support.</p>
+          </article>
+        </div>
+
+        <h2>How submissions work</h2>
+        <ul>
+          <li>To submit a new project, contact us with a GitHub link (if code), the document (if documentation), or a clear outline of the project scope.</li>
+          <li>If your project passes verification, it will be added to the site.</li>
+          <li>If your project does not pass verification, our team will try to provide feedback and support so you can improve and resubmit.</li>
+          <li>If you have a previously verified project, you can submit an application to become a volunteer reviewer or builder.</li>
+          <li>Submissions are partially anonymous to the public; you may use a first name or pseudonym.</li>
+        </ul>
+
+        <h2>Submission rules</h2>
+        <div class="rules-box">
+          <h3>Security</h3>
+          <p>Local-only systems are preferred. If a system is networked, it must be secure, especially when handling sensitive information.</p>
+          <ul>
+            <li>Row-level security and encryption for sensitive data</li>
+            <li>API security and authentication controls</li>
+            <li>Basic protections and hardened defaults</li>
+            <li>OAuth support where applicable</li>
+            <li>SQL injection prevention and secure query patterns</li>
+          </ul>
+
+          <h3>Interoperability</h3>
+          <p>All systems must be open source and should support straightforward data transfer in and out, so no single ecosystem is enforced.</p>
+          <ul>
+            <li>CSV information load</li>
+            <li>Import and export capacity</li>
+            <li>DOCX and PDF output</li>
+            <li>Comments: projects are easiest to iterate on when comments are consistent, simple, and clarifying.</li>
+          </ul>
+
+          <h3>Value</h3>
+          <p>Systems should provide distinct value through significantly better quality/cost or by serving an important niche purpose. If a system no longer has a distinct role, or has been outcompeted on the platform, it may be retired.</p>
+
+          <h3>Elegance</h3>
+          <p>Systems should solve their target problem in a direct and efficient way.</p>
+        </div>
+
+        <h3>Vibe-coding and AI-assisted code</h3>
+        <p>AI-assisted contributions are welcome. We recognize that they can make contributing significantly easier and faster, and we support their responsible use.</p>
+        <ul>
+          <li>We generally recommend IDE-based AI assistance, and we also accept work created with coding agents like Claude Code, Codex, and similar tools.</li>
+          <li>We discourage full-stack one-shot generators (for example Lovable or Bolt) when output is not meaningfully reviewed by a contributor.</li>
+          <li>Coding agents can produce bloated or inefficient implementations if edits are not reviewed carefully. Please review generated code for size, relevance, and maintainability.</li>
+          <li>Some inefficiency is acceptable, but submissions should remain practical for iteration and review, not excessively large, unstructured code dumps.</li>
+          <li>As long as the code is reviewable, follows the project rules, and works well, we are flexible about how much was written by an agent.</li>
+          <li>We especially encourage using agents for code review support and for improving or standardizing comments.</li>
+        </ul>
+      </section>`
+    })
+  );
+
+  await writeFile(
+    'contribute/submit/index.html',
+    layout({
+      title: 'Submit | Contribute | TheOpenLawLab',
+      description: 'Submission and verification guidance for contributing projects to TheOpenLawLab.',
+      canonicalPath: '/contribute/submit/',
+      content: `<section>
+        <h1>Submit a Project</h1>
+        <p>Send us your project using one of the following:</p>
+        <ul>
+          <li>A GitHub repository link for software projects</li>
+          <li>A document for documentation-driven projects</li>
+          <li>An outline describing the project scope and intended users</li>
+        </ul>
+        <p>Submissions go through verification before publication. Approved projects are listed on the site, and non-approved projects receive feedback when possible so they can be improved and resubmitted.</p>
+        <p>Submissions are partially anonymous to the public. You may use your first name or a pseudonym.</p>
+        <p><a class="btn" href="/contribute/">Back to Contribute</a></p>
+      </section>`
+    })
+  );
+
+  await writeFile(
+    'contribute/volunteer/index.html',
+    layout({
+      title: 'Volunteer | Contribute | TheOpenLawLab',
+      description: 'Volunteer pathways for contributors with verified submissions.',
+      canonicalPath: '/contribute/volunteer/',
+      content: `<section>
+        <h1>Volunteer</h1>
+        <p>Volunteering supports project review, maintenance, and new development for open legal-aid systems.</p>
+        <p>If you have previously submitted a project that passed verification, you are encouraged to apply as a volunteer contributor.</p>
+        <p>Volunteer roles may include security review, interoperability testing, documentation, and feature development.</p>
+        <p><a class="btn" href="/contribute/">Back to Contribute</a></p>
+      </section>`
+    })
+  );
+
+  await writeFile(
+    'contribute/donate/index.html',
+    layout({
+      title: 'Donate | Contribute | TheOpenLawLab',
+      description: 'Support TheOpenLawLab with donations to sustain open legal-aid infrastructure.',
+      canonicalPath: '/contribute/donate/',
+      content: `<section>
+        <h1>Donate</h1>
+        <p>Donations help sustain hosting, maintenance, and review capacity for open-source legal-aid systems.</p>
+        <p>Financial support allows the project to continue publishing free tools and documentation for legal service providers and the communities they serve.</p>
+        <p><a class="btn" href="/contribute/">Back to Contribute</a></p>
       </section>`
     })
   );
