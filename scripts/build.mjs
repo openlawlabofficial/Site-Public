@@ -233,6 +233,7 @@ async function main() {
   await writeFile('assets/projects.js', await fs.readFile(path.join(root, 'src/projects.js'), 'utf8'));
   await writeFile('assets/footer-motion.js', await fs.readFile(path.join(root, 'src/footer-motion.js'), 'utf8'));
   await writeFile('assets/modal.js', await fs.readFile(path.join(root, 'src/modal.js'), 'utf8'));
+  await writeFile('assets/home-landing.js', await fs.readFile(path.join(root, 'src/home-landing.js'), 'utf8'));
   await writeFile('assets/brand-icon.svg', await fs.readFile(path.join(root, 'src/assets/brand-icon.svg'), 'utf8'));
   await writeFile('assets/footer-o-icon.svg', await fs.readFile(path.join(root, 'src/assets/footer-o-icon.svg'), 'utf8'));
 
@@ -246,22 +247,29 @@ async function main() {
       title: 'TheOpenLawLab | Public Projects',
       description: site.description,
       canonicalPath: '/',
-      content: `<section class="hero">
-        <h1>Open-source tools for legal aid systems</h1>
-        <p>We build practical civic-tech infrastructure that improves legal aid operations and structural efficiency.</p>
-        <div class="cta-row">
-          <a class="btn" href="/projects/">Browse Projects</a>
-          <a class="btn btn-secondary" href="/contribute/">Contribute</a>
+      content: `<section class="landing-hero" aria-label="TheOpenLawLab landing section">
+        <canvas class="landing-hero-canvas" data-landing-canvas aria-hidden="true"></canvas>
+        <div class="landing-hero-overlay"></div>
+        <div class="landing-hero-content">
+          <p class="landing-kicker">TheOpenLawLab</p>
+          <h1>Open-source tools for legal aid systems</h1>
+          <p>We build practical civic-tech infrastructure that improves legal aid operations and structural efficiency.</p>
+          <div class="cta-row">
+            <a class="btn" href="/projects/">Browse Projects</a>
+            <a class="btn btn-secondary" href="/contribute/">Contribute</a>
+          </div>
+          <p class="landing-scroll">Scroll to explore ↓</p>
         </div>
       </section>
-      <section>
+      <section class="hero">
         <h2>What is TheOpenLawLab?</h2>
         <p>TheOpenLawLab is a public-interest engineering initiative focused on open, reusable legal-aid tooling. Volunteers and domain practitioners collaborate to ship practical tools for intake, communications, and case preparation.</p>
       </section>
       <section>
         <h2>Featured Projects</h2>
         ${featuredSection}
-      </section>`
+      </section>
+      <script type="module" src="/assets/home-landing.js"></script>`
     })
   );
 
