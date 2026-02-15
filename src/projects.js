@@ -66,6 +66,14 @@ const renderCards = () => {
   if (state.page > pages) state.page = pages;
 
   const pageItems = state.filtered.slice((state.page - 1) * PAGE_SIZE, state.page * PAGE_SIZE);
+
+  if (!total) {
+    els.results.innerHTML = '<p class="empty-state">Sorry we can’t find you any projects right now, check back soon!</p>';
+    els.count.textContent = '0 projects found.';
+    els.pagination.innerHTML = '';
+    return;
+  }
+
   els.results.innerHTML = pageItems
     .map(
       (project) => `<article class="project-card">
@@ -191,8 +199,8 @@ async function init() {
   const response = await fetch('/search-index.json');
   state.projects = await response.json();
 
-  const categories = [...new Set(state.projects.map((project) => project.category).filter(Boolean))].sort();
-  const tags = [...new Set(state.projects.flatMap((project) => project.tags))].sort();
+  const categories = [...new Set(state.projects.map((project) => project.topic).filter(Boolean))].sort();
+  const tags = [...new Set(state.projects.flatMap((project) => project.states_and_territories || []))].sort();
   state.allTags = tags;
 
   els.categoryFilter.insertAdjacentHTML('beforeend', categories.map((c) => `<option value="${c}">${c}</option>`).join(''));

@@ -58,8 +58,7 @@ const footerData = {
     { href: 'https://www.linkedin.com', label: 'LinkedIn', icon: 'L' }
   ],
   title: 'The Open Law Lab',
-  subtitle: 'Open-source legal infrastructure for everyone',
-  copyright: `©${new Date().getUTCFullYear()} TheOpenLawLab. All rights reserved.`
+  subtitle: 'Open-source legal infrastructure for everyone'
 };
 
 const requiredFields = [
@@ -129,7 +128,6 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
             <li><a href="/contribute/">Contribute</a></li>
           </ul>
         </nav>
-        <button class="btn btn-secondary btn-compact" type="button" data-dialog-trigger>Open Dialog</button>
       </div>
     </header>
     <main id="main" class="shell">${content}</main>
@@ -149,8 +147,8 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
           ×
         </button>
         <div class="dialog-header">
-          <h2 id="dialog-title">Dialog</h2>
-          <p id="dialog-description">An example modal with dotted overlay, blur, keyboard support, and close controls.</p>
+          <h2 id="dialog-title">Welcome to TheOpenLawLab</h2>
+          <p id="dialog-description">We just launched. Thanks for visiting — more projects, tools, and resources are coming soon.</p>
         </div>
         <img
           class="dialog-image"
@@ -183,16 +181,6 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
               <div>
             <p class="sticky-footer-title">${footerTitle}</p>
             <p class="sticky-footer-subtitle">${esc(footerData.subtitle)}</p>
-              </div>
-              <div class="sticky-footer-meta">
-            <p>${esc(footerData.copyright)}</p>
-            <ul class="social-list" aria-label="Social links">
-              ${footerData.social
-                .map(
-                  (social) => `<li><a href="${esc(social.href)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(social.label)}">${esc(social.icon)}</a></li>`
-                )
-                .join('')}
-            </ul>
               </div>
             </div>
           </div>
@@ -273,6 +261,9 @@ async function main() {
   await writeFile('assets/footer-o-icon.svg', await fs.readFile(path.join(root, 'src/assets/footer-o-icon.svg'), 'utf8'));
 
   const featured = projects.slice(0, 3).map(projectCard).join('');
+  const featuredSection = featured
+    ? `<div class="grid">${featured}</div>`
+    : '<p class="empty-state">Sorry we can’t find you any projects right now, check back soon!</p>';
   await writeFile(
     'index.html',
     layout({
@@ -293,7 +284,7 @@ async function main() {
       </section>
       <section>
         <h2>Featured Projects</h2>
-        <div class="grid">${featured}</div>
+        ${featuredSection}
       </section>`
     })
   );

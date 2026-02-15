@@ -5,6 +5,7 @@ if (dialogRoot) {
   const overlay = dialogRoot.querySelector('[data-dialog-overlay]');
   const closeButtons = dialogRoot.querySelectorAll('[data-dialog-close]');
   const content = dialogRoot.querySelector('[data-dialog-content]');
+  const welcomeSeenKey = 'openlawlab:welcome-modal-seen';
 
   let lastActive = null;
 
@@ -72,4 +73,9 @@ if (dialogRoot) {
     }
     trapFocus(event);
   });
+
+  if (!window.localStorage.getItem(welcomeSeenKey)) {
+    openDialog();
+    window.localStorage.setItem(welcomeSeenKey, 'true');
+  }
 }
