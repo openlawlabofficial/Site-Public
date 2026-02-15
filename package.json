@@ -8,6 +8,7 @@
     "serve": "python3 -m http.server 4173 --directory dist"
   },
   "dependencies": {
+    "framer-motion": "^12.34.0",
     "marked": "^14.1.2"
   }
 }
