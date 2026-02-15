@@ -13,6 +13,55 @@ const site = {
   baseUrl: 'https://theopenlawlab.org'
 };
 
+const footerData = {
+  sections: [
+    {
+      title: 'About',
+      links: [
+        { label: 'Home', href: '/' },
+        { label: 'Projects', href: '/projects/' },
+        { label: 'Our Mission', href: '/about/' },
+        { label: 'Contact Us', href: '/contribute/' }
+      ]
+    },
+    {
+      title: 'Education',
+      links: [
+        { label: 'News', href: '/about/' },
+        { label: 'Learn', href: '/projects/' },
+        { label: 'Certification', href: '/contribute/volunteer/' },
+        { label: 'Publications', href: '/about/' }
+      ]
+    },
+    {
+      title: 'Services',
+      links: [
+        { label: 'Web Design', href: '/projects/' },
+        { label: 'Development', href: '/projects/' },
+        { label: 'Consulting', href: '/contribute/' },
+        { label: 'Support', href: '/contribute/donate/' }
+      ]
+    },
+    {
+      title: 'Resources',
+      links: [
+        { label: 'Blog', href: '/about/' },
+        { label: 'Documentation', href: '/projects/' },
+        { label: 'Community', href: '/contribute/volunteer/' },
+        { label: 'Help Center', href: '/contribute/' }
+      ]
+    }
+  ],
+  social: [
+    { href: 'https://x.com', label: 'Twitter', icon: 'T' },
+    { href: 'https://github.com', label: 'GitHub', icon: 'G' },
+    { href: 'https://www.linkedin.com', label: 'LinkedIn', icon: 'L' }
+  ],
+  title: 'Open Law',
+  subtitle: 'Open-source legal infrastructure for everyone',
+  copyright: `©${new Date().getUTCFullYear()} TheOpenLawLab. All rights reserved.`
+};
+
 const requiredFields = [
   'slug',
   'title',
@@ -106,7 +155,40 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
       </div>
     </header>
     <main id="main" class="shell">${content}</main>
-    <footer class="site-footer shell">TheOpenLawLab</footer>
+    <footer class="sticky-footer" aria-label="Site footer">
+      <div class="shell sticky-footer-shell">
+        <div class="sticky-footer-grid">
+          ${footerData.sections
+            .map(
+              (section) => `<section class="footer-nav-section">
+              <h2>${esc(section.title)}</h2>
+              <ul>
+                ${section.links
+                  .map((link) => `<li><a href="${esc(link.href)}">${esc(link.label)}</a></li>`)
+                  .join('')}
+              </ul>
+            </section>`
+            )
+            .join('')}
+        </div>
+        <div class="sticky-footer-bottom">
+          <div>
+            <p class="sticky-footer-title">${esc(footerData.title)}</p>
+            <p class="sticky-footer-subtitle">${esc(footerData.subtitle)}</p>
+          </div>
+          <div class="sticky-footer-meta">
+            <p>${esc(footerData.copyright)}</p>
+            <ul class="social-list" aria-label="Social links">
+              ${footerData.social
+                .map(
+                  (social) => `<li><a href="${esc(social.href)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(social.label)}">${esc(social.icon)}</a></li>`
+                )
+                .join('')}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
   </body>
 </html>`;
 

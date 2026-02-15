@@ -172,3 +172,132 @@ input:focus, select:focus, button:focus, a:focus { outline: 3px solid var(--ring
 .pagination button[aria-current="page"] { background: var(--secondary); border-color: var(--ring); color: var(--secondary-foreground); }
 .skip-link { position: absolute; left: -9999px; }
 .skip-link:focus { left: 1rem; top: 1rem; background: var(--surface); color: var(--text); padding: 0.4rem; border: 1px solid var(--border); }
+
+
+.sticky-footer {
+  margin-top: 2rem;
+  background:
+    radial-gradient(circle at top right, color-mix(in oklab, var(--primary) 16%, transparent) 0%, transparent 38%),
+    radial-gradient(circle at bottom left, color-mix(in oklab, var(--secondary) 24%, transparent) 0%, transparent 40%),
+    linear-gradient(145deg, color-mix(in oklab, var(--card) 92%, black), color-mix(in oklab, var(--muted) 85%, black));
+  border-top: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.sticky-footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to top, color-mix(in oklab, var(--background) 72%, transparent), transparent);
+}
+
+.sticky-footer-shell {
+  position: relative;
+  z-index: 1;
+  min-height: 60vh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: clamp(1.4rem, 2.8vw, 2.5rem);
+  padding: clamp(1.4rem, 2.8vw, 3rem) 0;
+}
+
+.sticky-footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.2rem 1.8rem;
+  align-content: start;
+}
+
+.footer-nav-section h2 {
+  margin: 0 0 0.55rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted-text);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.35rem;
+}
+
+.footer-nav-section ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.footer-nav-section a {
+  color: var(--muted-text);
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+
+.footer-nav-section a:hover {
+  color: var(--text);
+}
+
+.sticky-footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.sticky-footer-title {
+  margin: 0;
+  font-size: clamp(2.1rem, 9vw, 6rem);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, var(--foreground), var(--muted-foreground), color-mix(in oklab, var(--foreground) 72%, transparent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.sticky-footer-subtitle,
+.sticky-footer-meta p {
+  margin: 0.5rem 0 0;
+  color: var(--muted-text);
+  font-size: 0.9rem;
+}
+
+.sticky-footer-meta {
+  text-align: right;
+}
+
+.social-list {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: inline-flex;
+  gap: 0.45rem;
+}
+
+.social-list a {
+  width: 1.9rem;
+  height: 1.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: var(--muted-text);
+  text-decoration: none;
+  background: color-mix(in oklab, var(--muted) 80%, transparent);
+  border: 1px solid var(--border);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.social-list a:hover {
+  color: var(--primary-foreground);
+  background: linear-gradient(120deg, var(--primary), var(--secondary));
+}
+
+@media (max-width: 640px) {
+  .sticky-footer-meta {
+    text-align: left;
+  }
+}
