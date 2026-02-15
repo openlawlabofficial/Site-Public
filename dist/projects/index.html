@@ -34,7 +34,10 @@
         <p>Search and filter projects by title, description, tags, and category.</p>
         <form class="controls" role="search" aria-label="Project search form">
           <label for="search-input">Search projects</label>
-          <input id="search-input" name="q" type="search" placeholder="Search title, tags, description" />
+          <div class="search-popover">
+            <input id="search-input" name="q" type="search" autocomplete="off" placeholder="Search title, tags, description" aria-expanded="false" aria-controls="search-popover-content" aria-autocomplete="list" />
+            <div id="search-popover-content" class="search-popover-content" role="listbox" hidden></div>
+          </div>
           <label for="category-filter">Category</label>
           <select id="category-filter" name="category"><option value="">All categories</option></select>
           <fieldset>

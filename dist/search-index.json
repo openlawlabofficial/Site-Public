@@ -10,7 +10,8 @@
       "workflow"
     ],
     "category": "Case Preparation",
-    "updated_at": "2026-02-02"
+    "updated_at": "2026-02-02",
+    "featured": true
   },
   {
     "slug": "caseflow-optimizer",
@@ -23,7 +24,8 @@
       "legal-aid"
     ],
     "category": "Operations",
-    "updated_at": "2026-01-12"
+    "updated_at": "2026-01-12",
+    "featured": true
   },
   {
     "slug": "hearing-reminder",
@@ -36,6 +38,7 @@
       "accessibility"
     ],
     "category": "Client Support",
-    "updated_at": "2025-12-08"
+    "updated_at": "2025-12-08",
+    "featured": false
   }
 ]

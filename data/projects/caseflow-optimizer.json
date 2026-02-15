@@ -3,11 +3,18 @@
   "title": "Caseflow Optimizer",
   "short_description": "A triage and case routing tool for legal aid intake teams.",
   "full_description": "## Overview\n\nCaseflow Optimizer helps legal aid clinics route requests to the right support track quickly.\n\n### Highlights\n\n- Rules-based intake categorization\n- Priority scoring for urgent matters\n- Exportable reports for weekly operations\n",
-  "tags": ["intake", "triage", "legal-aid"],
+  "tags": [
+    "intake",
+    "triage",
+    "legal-aid"
+  ],
   "category": "Operations",
   "github_url": "https://github.com/theopenlawlab/caseflow-optimizer",
   "download_url": "https://example.org/downloads/caseflow-optimizer.zip",
-  "maintainer": ["OpenLawLab Volunteers"],
+  "maintainer": [
+    "OpenLawLab Volunteers"
+  ],
+  "featured": true,
   "license": "MIT",
   "created_at": "2024-01-20",
   "updated_at": "2026-01-12"
