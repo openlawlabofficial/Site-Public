@@ -199,7 +199,16 @@ const projectCard = (project) => `<article class="project-card" data-project-car
 </article>`;
 
 async function loadProjects() {
-  const files = (await fs.readdir(dataDir)).filter((name) => name.endsWith('.json'));
+  let files = [];
+  try {
+    files = (await fs.readdir(dataDir)).filter((name) => name.endsWith('.json'));
+  } catch (error) {
+    if (error && error.code === 'ENOENT') {
+      return [];
+    }
+    throw error;
+  }
+
   const projects = [];
   for (const file of files) {
     const raw = await fs.readFile(path.join(dataDir, file), 'utf8');
