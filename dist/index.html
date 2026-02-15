@@ -29,46 +29,51 @@
         </nav>
       </div>
     </header>
-    <main id="main" class="shell"><section class="hero">
-        <h1>Open-source tools for legal aid systems</h1>
-        <p>We build practical civic-tech infrastructure that improves legal aid operations and structural efficiency.</p>
-        <div class="cta-row">
-          <a class="btn" href="/projects/">Browse Projects</a>
-          <a class="btn btn-secondary" href="/contribute/">Contribute</a>
+    <main id="main" class="shell"><section class="landing-hero" aria-label="TheOpenLawLab landing section">
+        <canvas class="landing-hero-canvas" data-landing-canvas aria-hidden="true"></canvas>
+        <div class="landing-hero-overlay"></div>
+        <div class="landing-hero-content">
+          <p class="landing-kicker">TheOpenLawLab</p>
+          <h1>Open-source tools for legal aid systems</h1>
+          <p>We build practical civic-tech infrastructure that improves legal aid operations and structural efficiency.</p>
+          <div class="cta-row">
+            <a class="btn" href="/projects/">Browse Projects</a>
+            <a class="btn btn-secondary" href="/contribute/">Contribute</a>
+          </div>
+          <p class="landing-scroll">Scroll to explore ↓</p>
         </div>
       </section>
-      <section>
+      <section class="hero">
         <h2>What is TheOpenLawLab?</h2>
         <p>TheOpenLawLab is a public-interest engineering initiative focused on open, reusable legal-aid tooling. Volunteers and domain practitioners collaborate to ship practical tools for intake, communications, and case preparation.</p>
       </section>
       <section>
         <h2>Featured Projects</h2>
-        <div class="grid"><article class="project-card" data-project-card>
-  <h3><a href="/projects/caseflow-optimizer/">Caseflow Optimizer</a></h3>
-  <p>Caseflow Optimizer helps legal aid clinics route requests to the right support track quickly.</p>
-  <p class="meta"><strong>Topic:</strong> Operations</p>
-  <p class="meta"><strong>Legal Area:</strong> Civil Legal Aid</p>
-  <p class="meta"><strong>Project Type:</strong> repository</p>
-  <p class="meta"><strong>Updated:</strong> Jan 12, 2026</p>
-  <ul class="tag-list"><li class="tag">California</li><li class="tag">New York</li></ul>
-</article><article class="project-card" data-project-card>
-  <h3><a href="/projects/hearing-reminder/">Hearing Reminder</a></h3>
-  <p>Hearing Reminder provides standard multilingual reminders that reduce no-shows and improve preparation outcomes.</p>
-  <p class="meta"><strong>Topic:</strong> Client Communication</p>
-  <p class="meta"><strong>Legal Area:</strong> Family Law</p>
-  <p class="meta"><strong>Project Type:</strong> file</p>
-  <p class="meta"><strong>Updated:</strong> Dec 16, 2025</p>
-  <ul class="tag-list"><li class="tag">Puerto Rico</li></ul>
-</article><article class="project-card" data-project-card>
-  <h3><a href="/projects/doc-intake-checker/">Document Intake Checker</a></h3>
-  <p>Document Intake Checker helps staff and volunteers identify missing paperwork before filing deadlines.</p>
-  <p class="meta"><strong>Topic:</strong> Intake</p>
-  <p class="meta"><strong>Legal Area:</strong> Housing</p>
-  <p class="meta"><strong>Project Type:</strong> repository</p>
-  <p class="meta"><strong>Updated:</strong> Nov 2, 2025</p>
-  <ul class="tag-list"><li class="tag">Texas</li><li class="tag">Florida</li></ul>
-</article></div>
-      </section></main>
+        <p class="empty-state">Sorry we can’t find you any projects right now, check back soon!</p>
+      </section>
+      <script type="module" src="/assets/home-landing.js"></script></main>
+
+    <div class="dialog-root" data-dialog-root hidden>
+      <div class="dialog-overlay" data-dialog-overlay></div>
+      <section
+        class="dialog-content"
+        data-dialog-content
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dialog-title"
+        aria-describedby="dialog-description"
+        tabindex="-1"
+      >
+        <button class="dialog-close" type="button" data-dialog-close aria-label="Close dialog">
+          ×
+        </button>
+        <div class="dialog-header">
+          <h2 id="dialog-title">Welcome to TheOpenLawLab</h2>
+          <p id="dialog-description">We just launched. Thanks for visiting — more projects, tools, and resources are coming soon.</p>
+        </div>
+      </section>
+    </div>
+
     <footer class="sticky-footer" aria-label="Site footer" data-sticky-footer>
       <div class="sticky-footer-clip">
         <div class="sticky-footer-track">
@@ -77,22 +82,7 @@
           <section class="footer-nav-section" data-footer-item style="--footer-item-delay:0s">
               <h2>About</h2>
               <ul>
-                <li><a href="/">Home</a></li><li><a href="/projects/">Projects</a></li><li><a href="/about/">Our Mission</a></li><li><a href="/contribute/">Contact Us</a></li>
-              </ul>
-            </section><section class="footer-nav-section" data-footer-item style="--footer-item-delay:0.06s">
-              <h2>Education</h2>
-              <ul>
-                <li><a href="/about/">News</a></li><li><a href="/projects/">Learn</a></li><li><a href="/contribute/volunteer/">Certification</a></li><li><a href="/about/">Publications</a></li>
-              </ul>
-            </section><section class="footer-nav-section" data-footer-item style="--footer-item-delay:0.12s">
-              <h2>Services</h2>
-              <ul>
-                <li><a href="/projects/">Web Design</a></li><li><a href="/projects/">Development</a></li><li><a href="/contribute/">Consulting</a></li><li><a href="/contribute/donate/">Support</a></li>
-              </ul>
-            </section><section class="footer-nav-section" data-footer-item style="--footer-item-delay:0.18s">
-              <h2>Resources</h2>
-              <ul>
-                <li><a href="/about/">Blog</a></li><li><a href="/projects/">Documentation</a></li><li><a href="/contribute/volunteer/">Community</a></li><li><a href="/contribute/">Help Center</a></li>
+                <li><a href="/">Home</a></li><li><a href="/projects/">Projects</a></li><li><a href="/about/">Our Mission</a></li><li><a href="/contact/">Contact Us</a></li>
               </ul>
             </section>
             </div>
@@ -101,17 +91,12 @@
             <p class="sticky-footer-title">The <span class="sticky-footer-title-icon" aria-hidden="true"><img class="brand-icon" src="/assets/footer-o-icon.svg" alt="" /></span><span class="sr-only">O</span>pen Law Lab</p>
             <p class="sticky-footer-subtitle">Open-source legal infrastructure for everyone</p>
               </div>
-              <div class="sticky-footer-meta">
-            <p>©2026 TheOpenLawLab. All rights reserved.</p>
-            <ul class="social-list" aria-label="Social links">
-              <li><a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">T</a></li><li><a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub">G</a></li><li><a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">L</a></li>
-            </ul>
-              </div>
             </div>
           </div>
         </div>
       </div>
     </footer>
+    <script type="module" src="/assets/modal.js"></script>
     <script type="module" src="/assets/footer-motion.js"></script>
   </body>
 </html>

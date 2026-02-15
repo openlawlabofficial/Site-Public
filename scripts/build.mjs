@@ -21,34 +21,7 @@ const footerData = {
         { label: 'Home', href: '/' },
         { label: 'Projects', href: '/projects/' },
         { label: 'Our Mission', href: '/about/' },
-        { label: 'Contact Us', href: '/contribute/' }
-      ]
-    },
-    {
-      title: 'Education',
-      links: [
-        { label: 'News', href: '/about/' },
-        { label: 'Learn', href: '/projects/' },
-        { label: 'Certification', href: '/contribute/volunteer/' },
-        { label: 'Publications', href: '/about/' }
-      ]
-    },
-    {
-      title: 'Services',
-      links: [
-        { label: 'Web Design', href: '/projects/' },
-        { label: 'Development', href: '/projects/' },
-        { label: 'Consulting', href: '/contribute/' },
-        { label: 'Support', href: '/contribute/donate/' }
-      ]
-    },
-    {
-      title: 'Resources',
-      links: [
-        { label: 'Blog', href: '/about/' },
-        { label: 'Documentation', href: '/projects/' },
-        { label: 'Community', href: '/contribute/volunteer/' },
-        { label: 'Help Center', href: '/contribute/' }
+        { label: 'Contact Us', href: '/contact/' }
       ]
     }
   ],
@@ -58,8 +31,7 @@ const footerData = {
     { href: 'https://www.linkedin.com', label: 'LinkedIn', icon: 'L' }
   ],
   title: 'The Open Law Lab',
-  subtitle: 'Open-source legal infrastructure for everyone',
-  copyright: `©${new Date().getUTCFullYear()} TheOpenLawLab. All rights reserved.`
+  subtitle: 'Open-source legal infrastructure for everyone'
 };
 
 const requiredFields = [
@@ -132,6 +104,28 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
       </div>
     </header>
     <main id="main" class="shell">${content}</main>
+
+    <div class="dialog-root" data-dialog-root hidden>
+      <div class="dialog-overlay" data-dialog-overlay></div>
+      <section
+        class="dialog-content"
+        data-dialog-content
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dialog-title"
+        aria-describedby="dialog-description"
+        tabindex="-1"
+      >
+        <button class="dialog-close" type="button" data-dialog-close aria-label="Close dialog">
+          ×
+        </button>
+        <div class="dialog-header">
+          <h2 id="dialog-title">Welcome to TheOpenLawLab</h2>
+          <p id="dialog-description">We just launched. Thanks for visiting — more projects, tools, and resources are coming soon.</p>
+        </div>
+      </section>
+    </div>
+
     <footer class="sticky-footer" aria-label="Site footer" data-sticky-footer>
       <div class="sticky-footer-clip">
         <div class="sticky-footer-track">
@@ -155,21 +149,12 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
             <p class="sticky-footer-title">${footerTitle}</p>
             <p class="sticky-footer-subtitle">${esc(footerData.subtitle)}</p>
               </div>
-              <div class="sticky-footer-meta">
-            <p>${esc(footerData.copyright)}</p>
-            <ul class="social-list" aria-label="Social links">
-              ${footerData.social
-                .map(
-                  (social) => `<li><a href="${esc(social.href)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(social.label)}">${esc(social.icon)}</a></li>`
-                )
-                .join('')}
-            </ul>
-              </div>
             </div>
           </div>
         </div>
       </div>
     </footer>
+    <script type="module" src="/assets/modal.js"></script>
     <script type="module" src="/assets/footer-motion.js"></script>
   </body>
 </html>`;
@@ -187,7 +172,16 @@ const projectCard = (project) => `<article class="project-card" data-project-car
 </article>`;
 
 async function loadProjects() {
-  const files = (await fs.readdir(dataDir)).filter((name) => name.endsWith('.json'));
+  let files = [];
+  try {
+    files = (await fs.readdir(dataDir)).filter((name) => name.endsWith('.json'));
+  } catch (error) {
+    if (error && error.code === 'ENOENT') {
+      return [];
+    }
+    throw error;
+  }
+
   const projects = [];
   for (const file of files) {
     const raw = await fs.readFile(path.join(dataDir, file), 'utf8');
@@ -238,32 +232,44 @@ async function main() {
   await writeFile('assets/styles.css', await fs.readFile(path.join(root, 'src/styles.css'), 'utf8'));
   await writeFile('assets/projects.js', await fs.readFile(path.join(root, 'src/projects.js'), 'utf8'));
   await writeFile('assets/footer-motion.js', await fs.readFile(path.join(root, 'src/footer-motion.js'), 'utf8'));
+  await writeFile('assets/modal.js', await fs.readFile(path.join(root, 'src/modal.js'), 'utf8'));
+  await writeFile('assets/home-landing.js', await fs.readFile(path.join(root, 'src/home-landing.js'), 'utf8'));
   await writeFile('assets/brand-icon.svg', await fs.readFile(path.join(root, 'src/assets/brand-icon.svg'), 'utf8'));
   await writeFile('assets/footer-o-icon.svg', await fs.readFile(path.join(root, 'src/assets/footer-o-icon.svg'), 'utf8'));
 
   const featured = projects.slice(0, 3).map(projectCard).join('');
+  const featuredSection = featured
+    ? `<div class="grid">${featured}</div>`
+    : '<p class="empty-state">Sorry we can’t find you any projects right now, check back soon!</p>';
   await writeFile(
     'index.html',
     layout({
       title: 'TheOpenLawLab | Public Projects',
       description: site.description,
       canonicalPath: '/',
-      content: `<section class="hero">
-        <h1>Open-source tools for legal aid systems</h1>
-        <p>We build practical civic-tech infrastructure that improves legal aid operations and structural efficiency.</p>
-        <div class="cta-row">
-          <a class="btn" href="/projects/">Browse Projects</a>
-          <a class="btn btn-secondary" href="/contribute/">Contribute</a>
+      content: `<section class="landing-hero" aria-label="TheOpenLawLab landing section">
+        <canvas class="landing-hero-canvas" data-landing-canvas aria-hidden="true"></canvas>
+        <div class="landing-hero-overlay"></div>
+        <div class="landing-hero-content">
+          <p class="landing-kicker">TheOpenLawLab</p>
+          <h1>Open-source tools for legal aid systems</h1>
+          <p>We build practical civic-tech infrastructure that improves legal aid operations and structural efficiency.</p>
+          <div class="cta-row">
+            <a class="btn" href="/projects/">Browse Projects</a>
+            <a class="btn btn-secondary" href="/contribute/">Contribute</a>
+          </div>
+          <p class="landing-scroll">Scroll to explore ↓</p>
         </div>
       </section>
-      <section>
+      <section class="hero">
         <h2>What is TheOpenLawLab?</h2>
         <p>TheOpenLawLab is a public-interest engineering initiative focused on open, reusable legal-aid tooling. Volunteers and domain practitioners collaborate to ship practical tools for intake, communications, and case preparation.</p>
       </section>
       <section>
         <h2>Featured Projects</h2>
-        <div class="grid">${featured}</div>
-      </section>`
+        ${featuredSection}
+      </section>
+      <script type="module" src="/assets/home-landing.js"></script>`
     })
   );
 
@@ -462,7 +468,11 @@ async function main() {
         </ul>
         <p>Submissions go through verification before publication. Approved projects are listed on the site, and non-approved projects receive feedback when possible so they can be improved and resubmitted.</p>
         <p>Submissions are partially anonymous to the public. You may use your first name or a pseudonym.</p>
-        <p><a class="btn" href="/contribute/">Back to Contribute</a></p>
+        <p>Want to submit a project now? Get in touch.</p>
+        <div class="cta-row">
+          <a class="btn" href="/contact/">Contact Us</a>
+          <a class="btn btn-secondary" href="/contribute/">Back to Contribute</a>
+        </div>
       </section>`
     })
   );
@@ -476,9 +486,56 @@ async function main() {
       content: `<section>
         <h1>Volunteer</h1>
         <p>Volunteering supports project review, maintenance, and new development for open legal-aid systems.</p>
-        <p>If you have previously submitted a project that passed verification, you are encouraged to apply as a volunteer contributor.</p>
-        <p>Volunteer roles may include security review, interoperability testing, documentation, and feature development.</p>
-        <p><a class="btn" href="/contribute/">Back to Contribute</a></p>
+        <p>If you would like to become a volunteer, please apply here and we’ll get back to you as soon as possible.</p>
+        <div class="cta-row">
+          <a class="btn" href="/contact/">Contact Us</a>
+          <a class="btn btn-secondary" href="/contribute/">Back to Contribute</a>
+        </div>
+      </section>`
+    })
+  );
+
+  await writeFile(
+    'contact/index.html',
+    layout({
+      title: 'Contact Us | TheOpenLawLab',
+      description: 'Reach out to TheOpenLawLab with questions, collaboration ideas, or contribution inquiries.',
+      canonicalPath: '/contact/',
+      content: `<section>
+        <div class="contact-card">
+          <div class="contact-card-main">
+            <h1>Contact Us</h1>
+            <p>If you have any questions regarding our work or need help, please fill out the form. We do our best to respond within one business day.</p>
+            <div class="contact-highlights" aria-label="Suggested reasons to contact us">
+              <span>Volunteer</span>
+              <span>Submit a Project</span>
+              <span>Help</span>
+              <span>Complaint</span>
+              <span>Other</span>
+            </div>
+          </div>
+          <div class="contact-card-form-wrap">
+            <form class="controls contact-form" name="contact" method="POST" netlify>
+              <input type="hidden" name="form-name" value="contact" />
+              <label for="contact-name">Name</label>
+              <input id="contact-name" name="name" type="text" autocomplete="name" required />
+              <label for="contact-email">Email</label>
+              <input id="contact-email" name="email" type="email" autocomplete="email" required />
+              <label for="contact-topic">Topic</label>
+              <input id="contact-topic" name="topic" type="text" list="contact-topic-suggestions" placeholder="Choose or type a topic" required />
+              <datalist id="contact-topic-suggestions">
+                <option value="Volunteer"></option>
+                <option value="Submit a Project"></option>
+                <option value="Help"></option>
+                <option value="Complaint"></option>
+                <option value="Other"></option>
+              </datalist>
+              <label for="contact-message">Message</label>
+              <textarea id="contact-message" name="message" rows="6" required></textarea>
+              <button class="btn" type="submit">Submit</button>
+            </form>
+          </div>
+        </div>
       </section>`
     })
   );
@@ -493,6 +550,7 @@ async function main() {
         <h1>Donate</h1>
         <p>Donations help sustain hosting, maintenance, and review capacity for open-source legal-aid systems.</p>
         <p>Financial support allows the project to continue publishing free tools and documentation for legal service providers and the communities they serve.</p>
+        <p><strong>Note:</strong> We haven’t configured donations yet.</p>
         <p><a class="btn" href="/contribute/">Back to Contribute</a></p>
       </section>`
     })
