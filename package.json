@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "framer-motion": "^12.34.0",
-    "marked": "^14.1.2"
+    "lucide-react": "^0.564.0",
+    "marked": "^14.1.2",
+    "three": "^0.182.0"
   }
 }
