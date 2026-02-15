@@ -12,6 +12,14 @@ npm run serve
 
 Then open `http://localhost:4173`.
 
+## Netlify deployment
+
+This repo includes a `netlify.toml` so Netlify builds the site with `npm run build` and publishes the generated `dist/` directory.
+
+- Build command: `npm run build`
+- Publish directory: `dist`
+- Node version: `20`
+
 ## Project layout
 
 - `data/projects/` – project content source files
