@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Projects | TheOpenLawLab</title>
+    <meta name="description" content="Search and browse open-source legal aid projects from TheOpenLawLab." />
+    <meta property="og:title" content="Projects | TheOpenLawLab" />
+    <meta property="og:description" content="Search and browse open-source legal aid projects from TheOpenLawLab." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://theopenlawlab.org/projects/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Projects | TheOpenLawLab" />
+    <meta name="twitter:description" content="Search and browse open-source legal aid projects from TheOpenLawLab." />
+    <link rel="canonical" href="https://theopenlawlab.org/projects/" />
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="shell nav-wrap">
+        <a class="brand" href="/">TheOpenLawLab</a>
+        <nav aria-label="Primary">
+          <ul class="nav-list">
+            <li><a href="/projects/">Projects</a></li>
+            <li><a href="/about/">About</a></li>
+            <li><a href="/contribute/">Contribute</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="main" class="shell"><section>
+        <h1>Project Catalog</h1>
+        <p>Search and filter projects by title, description, tags, and category.</p>
+        <form class="controls" role="search" aria-label="Project search form">
+          <label for="search-input">Search projects</label>
+          <input id="search-input" name="q" type="search" placeholder="Search title, tags, description" />
+          <label for="category-filter">Category</label>
+          <select id="category-filter" name="category"><option value="">All categories</option></select>
+          <fieldset>
+            <legend>Tags</legend>
+            <div id="tag-filter" class="tag-filter"></div>
+          </fieldset>
+          <label for="sort-by">Sort by</label>
+          <select id="sort-by" name="sort">
+            <option value="newest">Newest</option>
+            <option value="alphabetical">Alphabetical</option>
+            <option value="updated">Recently updated</option>
+          </select>
+        </form>
+        <p id="result-count" aria-live="polite"></p>
+        <div id="project-results" class="grid"></div>
+        <nav id="pagination" aria-label="Pagination" class="pagination"></nav>
+      </section>
+      <script type="module" src="/assets/projects.js"></script></main>
+    <footer class="site-footer shell">Open-source tools for legal aid operations.</footer>
+  </body>
+</html>
