@@ -21,7 +21,8 @@ const footerData = {
         { label: 'Home', href: '/' },
         { label: 'Projects', href: '/projects/' },
         { label: 'Our Mission', href: '/about/' },
-        { label: 'Contact Us', href: '/contact/' }
+        { label: 'Contact Us', href: '/contact/' },
+        { label: 'Admin', href: '/admin/login/' }
       ]
     }
   ],
@@ -270,6 +271,87 @@ async function main() {
         ${featuredSection}
       </section>
       <script type="module" src="/assets/home-landing.js"></script>`
+    })
+  );
+
+
+  await writeFile(
+    'admin/login/index.html',
+    layout({
+      title: 'Admin Login | TheOpenLawLab',
+      description: 'Admin access portal for TheOpenLawLab.',
+      canonicalPath: '/admin/login/',
+      content: `<section class="admin-shell">
+        <h1>Admin Access</h1>
+        <p>Enter the admin password to continue.</p>
+        <form id="admin-login-form" class="admin-form" novalidate>
+          <label for="admin-password">Admin password</label>
+          <input id="admin-password" name="password" type="password" required autocomplete="current-password" />
+          <label class="admin-honeypot" for="admin-bot-trap">
+            <input id="admin-bot-trap" name="botTrap" type="checkbox" />
+            Don’t check this box - to prevent bots
+          </label>
+          <button class="btn" type="submit">Continue</button>
+          <p id="admin-login-message" class="admin-message" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+      <script type="module">
+        const form = document.querySelector('#admin-login-form');
+        const message = document.querySelector('#admin-login-message');
+
+        const setMessage = (text) => {
+          if (message) message.textContent = text;
+        };
+
+        form?.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const formData = new FormData(form);
+          const payload = {
+            password: String(formData.get('password') || ''),
+            botTrap: formData.get('botTrap') === 'on'
+          };
+
+          setMessage('Checking credentials...');
+
+          try {
+            const response = await fetch('/.netlify/functions/admin-auth', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.authorized) {
+              setMessage('Access denied.');
+              return;
+            }
+
+            sessionStorage.setItem('adminAuthorized', 'true');
+            window.location.assign('/admin/');
+          } catch (error) {
+            setMessage('Unable to verify credentials right now.');
+          }
+        });
+      </script>`
+    })
+  );
+
+  await writeFile(
+    'admin/index.html',
+    layout({
+      title: 'Admin | TheOpenLawLab',
+      description: 'Admin area for TheOpenLawLab.',
+      canonicalPath: '/admin/',
+      content: `<section class="admin-shell">
+        <h1>Admin</h1>
+        <p>This page is intentionally blank for now.</p>
+      </section>
+      <script type="module">
+        if (sessionStorage.getItem('adminAuthorized') !== 'true') {
+          window.location.replace('/admin/login/');
+        }
+      </script>`
     })
   );
 
