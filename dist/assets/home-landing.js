@@ -57,8 +57,10 @@ if (!canvas) {
 
     const getViewport = () => {
       const visualViewport = window.visualViewport;
-      const nextWidth = Math.round(visualViewport?.width || window.innerWidth || document.documentElement.clientWidth || viewportWidth || 0);
-      const nextHeight = Math.round(visualViewport?.height || window.innerHeight || document.documentElement.clientHeight || viewportHeight || 0);
+      const measuredWidth = Math.round(visualViewport?.width || window.innerWidth || document.documentElement.clientWidth || 0);
+      const measuredHeight = Math.round(visualViewport?.height || window.innerHeight || document.documentElement.clientHeight || 0);
+      const nextWidth = measuredWidth > 0 ? measuredWidth : viewportWidth;
+      const nextHeight = measuredHeight > 0 ? measuredHeight : viewportHeight;
       return { nextWidth, nextHeight };
     };
 
@@ -72,13 +74,10 @@ if (!canvas) {
       } else {
         const widthChanged = nextWidth > 220 && Math.abs(nextWidth - viewportWidth) > 1;
         const heightDelta = nextHeight - viewportHeight;
-        const meaningfulHeightChange = nextHeight > 220 && Math.abs(heightDelta) > 48;
+        const meaningfulHeightChange = nextHeight > 220 && Math.abs(heightDelta) > 24;
 
-        // iOS Safari toolbar changes can continuously nudge viewport height while scrolling.
-        // For touch devices, ignore small/mid downward changes so comet positions stay stable.
-        const shouldApplyHeightChange = hasTouchInput
-          ? (heightDelta >= 24 || (Math.abs(heightDelta) > 160 && widthChanged))
-          : meaningfulHeightChange;
+        // Apply any meaningful height update so comets remain aligned after viewport shifts.
+        const shouldApplyHeightChange = meaningfulHeightChange;
 
         if (widthChanged) viewportWidth = nextWidth;
         if (shouldApplyHeightChange) viewportHeight = nextHeight;

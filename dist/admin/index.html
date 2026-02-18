@@ -3,16 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Volunteer | Contribute | TheOpenLawLab</title>
-    <meta name="description" content="Volunteer pathways for contributors with verified submissions." />
-    <meta property="og:title" content="Volunteer | Contribute | TheOpenLawLab" />
-    <meta property="og:description" content="Volunteer pathways for contributors with verified submissions." />
+    <title>Admin | TheOpenLawLab</title>
+    <meta name="description" content="Admin area for TheOpenLawLab." />
+    <meta property="og:title" content="Admin | TheOpenLawLab" />
+    <meta property="og:description" content="Admin area for TheOpenLawLab." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://theopenlawlab.org/contribute/volunteer/" />
+    <meta property="og:url" content="https://theopenlawlab.org/admin/" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Volunteer | Contribute | TheOpenLawLab" />
-    <meta name="twitter:description" content="Volunteer pathways for contributors with verified submissions." />
-    <link rel="canonical" href="https://theopenlawlab.org/contribute/volunteer/" />
+    <meta name="twitter:title" content="Admin | TheOpenLawLab" />
+    <meta name="twitter:description" content="Admin area for TheOpenLawLab." />
+    <link rel="canonical" href="https://theopenlawlab.org/admin/" />
     <link rel="stylesheet" href="/assets/styles.css" />
   </head>
   <body>
@@ -29,15 +29,15 @@
         </nav>
       </div>
     </header>
-    <main id="main" class="shell"><section>
-        <h1>Volunteer</h1>
-        <p>Volunteering supports project review, maintenance, and new development for open legal-aid systems.</p>
-        <p>If you would like to become a volunteer, please apply here and we’ll get back to you as soon as possible.</p>
-        <div class="cta-row">
-          <a class="btn" href="/contact/">Contact Us</a>
-          <a class="btn btn-secondary" href="/contribute/">Back to Contribute</a>
-        </div>
-      </section></main>
+    <main id="main" class="shell"><section class="admin-shell">
+        <h1>Admin</h1>
+        <p>This page is intentionally blank for now.</p>
+      </section>
+      <script type="module">
+        if (sessionStorage.getItem('adminAuthorized') !== 'true') {
+          window.location.replace('/admin/login/');
+        }
+      </script></main>
 
     <div class="dialog-root" data-dialog-root hidden>
       <div class="dialog-overlay" data-dialog-overlay></div>
