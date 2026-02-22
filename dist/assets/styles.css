@@ -682,3 +682,59 @@ input:focus, select:focus, button:focus, a:focus { outline: 3px solid var(--ring
   margin: 0;
   color: var(--muted-text);
 }
+
+.admin-shell-wide {
+  max-width: 100%;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.4rem;
+}
+
+@media (min-width: 980px) {
+  .admin-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.8rem;
+  font-size: 0.92rem;
+}
+
+.admin-table th,
+.admin-table td {
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  padding: 0.4rem;
+  vertical-align: top;
+}
+
+.admin-table td button {
+  margin-right: 0.4rem;
+  margin-bottom: 0.3rem;
+}
+
+.admin-form input,
+.admin-form textarea,
+.admin-form select,
+#admin-search {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--card);
+  color: var(--foreground);
+  padding: 0.55rem 0.7rem;
+}
+
+.admin-row-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 0.8rem 0;
+}
