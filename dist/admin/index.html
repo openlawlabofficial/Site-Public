@@ -29,15 +29,51 @@
         </nav>
       </div>
     </header>
-    <main id="main" class="shell"><section class="admin-shell">
-        <h1>Admin</h1>
-        <p>This page is intentionally blank for now.</p>
+    <main id="main" class="shell"><section class="admin-shell admin-shell-wide">
+        <h1>Admin Catalog Manager</h1>
+        <p id="admin-message" class="admin-message" role="status" aria-live="polite"></p>
+        <div class="admin-grid">
+          <section>
+            <h2>Entries</h2>
+            <label for="admin-search">Search</label>
+            <input id="admin-search" type="search" placeholder="Search title, slug, type, status" />
+            <table class="admin-table">
+              <thead><tr><th>Title</th><th>Slug</th><th>Type</th><th>Last Update</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="admin-entry-list"></tbody>
+            </table>
+          </section>
+          <section>
+            <h2>Create / Edit Entry</h2>
+            <div class="admin-row-actions">
+              <button id="entry-create" class="btn" type="button">Create New</button>
+            </div>
+            <form id="entry-form" class="admin-form" novalidate>
+              <label>Slug<input name="slug" required /></label>
+              <label>Title<input name="title" required /></label>
+              <label>Project Type<select name="project_type"><option value="file">file</option><option value="repository">repository</option></select></label>
+              <label>Last Update<input name="lastupdate" type="date" required /></label>
+              <label>Status<select name="status"><option value="published">published</option><option value="draft">draft</option><option value="archived">archived</option></select></label>
+              <label>Overview<textarea name="overview" rows="3" required></textarea></label>
+              <label>Full Description (Markdown)<textarea name="full_description" rows="5" required></textarea></label>
+              <label>Author<input name="author" /></label>
+              <label>Topic<input name="topic" /></label>
+              <label>Legal Area<input name="legal_area" /></label>
+              <label>Repository URL<input name="repository_url" /></label>
+              <label>File URL<input name="file_url" /></label>
+              <label>States/Territories (comma-separated)<input name="states_and_territories" /></label>
+              <label>Highlights (comma-separated)<input name="highlights" /></label>
+              <label>Upload File (optional)<input id="entry-file" type="file" /></label>
+            </form>
+            <div class="admin-row-actions">
+              <button id="entry-submit" class="btn" type="button">Create PR for New Entry</button>
+              <button id="entry-archive" class="btn btn-secondary" type="button" disabled>Archive</button>
+              <button id="entry-hard-delete" class="btn btn-secondary" type="button">Hard Delete</button>
+            </div>
+            <p id="pr-result" class="admin-message"></p>
+          </section>
+        </div>
       </section>
-      <script type="module">
-        if (sessionStorage.getItem('adminAuthorized') !== 'true') {
-          window.location.replace('/admin/login/');
-        }
-      </script></main>
+      <script type="module" src="/assets/admin.js"></script></main>
 
     <div class="dialog-root" data-dialog-root hidden>
       <div class="dialog-overlay" data-dialog-overlay></div>

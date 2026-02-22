@@ -214,6 +214,7 @@ async function loadProjects() {
     project.topic = project.topic || '';
     project.legal_area = project.legal_area || '';
     project.featured = Boolean(project.featured);
+    project.status = project.status || 'published';
     projects.push(project);
   }
   return projects.sort((a, b) => b.lastupdate.localeCompare(a.lastupdate));
@@ -229,16 +230,18 @@ async function main() {
   await fs.rm(distDir, { recursive: true, force: true });
   await ensureDir(distDir);
   const projects = await loadProjects();
+  const publishedProjects = projects.filter((project) => project.status === 'published');
 
   await writeFile('assets/styles.css', await fs.readFile(path.join(root, 'src/styles.css'), 'utf8'));
   await writeFile('assets/projects.js', await fs.readFile(path.join(root, 'src/projects.js'), 'utf8'));
   await writeFile('assets/footer-motion.js', await fs.readFile(path.join(root, 'src/footer-motion.js'), 'utf8'));
   await writeFile('assets/modal.js', await fs.readFile(path.join(root, 'src/modal.js'), 'utf8'));
   await writeFile('assets/home-landing.js', await fs.readFile(path.join(root, 'src/home-landing.js'), 'utf8'));
+  await writeFile('assets/admin.js', await fs.readFile(path.join(root, 'src/admin.js'), 'utf8'));
   await writeFile('assets/brand-icon.svg', await fs.readFile(path.join(root, 'src/assets/brand-icon.svg'), 'utf8'));
   await writeFile('assets/footer-o-icon.svg', await fs.readFile(path.join(root, 'src/assets/footer-o-icon.svg'), 'utf8'));
 
-  const featured = projects.slice(0, 3).map(projectCard).join('');
+  const featured = publishedProjects.slice(0, 3).map(projectCard).join('');
   const featuredSection = featured
     ? `<div class="grid">${featured}</div>`
     : '<p class="empty-state">Sorry we can’t find you any projects right now, check back soon!</p>';
@@ -343,15 +346,51 @@ async function main() {
       title: 'Admin | TheOpenLawLab',
       description: 'Admin area for TheOpenLawLab.',
       canonicalPath: '/admin/',
-      content: `<section class="admin-shell">
-        <h1>Admin</h1>
-        <p>This page is intentionally blank for now.</p>
+      content: `<section class="admin-shell admin-shell-wide">
+        <h1>Admin Catalog Manager</h1>
+        <p id="admin-message" class="admin-message" role="status" aria-live="polite"></p>
+        <div class="admin-grid">
+          <section>
+            <h2>Entries</h2>
+            <label for="admin-search">Search</label>
+            <input id="admin-search" type="search" placeholder="Search title, slug, type, status" />
+            <table class="admin-table">
+              <thead><tr><th>Title</th><th>Slug</th><th>Type</th><th>Last Update</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="admin-entry-list"></tbody>
+            </table>
+          </section>
+          <section>
+            <h2>Create / Edit Entry</h2>
+            <div class="admin-row-actions">
+              <button id="entry-create" class="btn" type="button">Create New</button>
+            </div>
+            <form id="entry-form" class="admin-form" novalidate>
+              <label>Slug<input name="slug" required /></label>
+              <label>Title<input name="title" required /></label>
+              <label>Project Type<select name="project_type"><option value="file">file</option><option value="repository">repository</option></select></label>
+              <label>Last Update<input name="lastupdate" type="date" required /></label>
+              <label>Status<select name="status"><option value="published">published</option><option value="draft">draft</option><option value="archived">archived</option></select></label>
+              <label>Overview<textarea name="overview" rows="3" required></textarea></label>
+              <label>Full Description (Markdown)<textarea name="full_description" rows="5" required></textarea></label>
+              <label>Author<input name="author" /></label>
+              <label>Topic<input name="topic" /></label>
+              <label>Legal Area<input name="legal_area" /></label>
+              <label>Repository URL<input name="repository_url" /></label>
+              <label>File URL<input name="file_url" /></label>
+              <label>States/Territories (comma-separated)<input name="states_and_territories" /></label>
+              <label>Highlights (comma-separated)<input name="highlights" /></label>
+              <label>Upload File (optional)<input id="entry-file" type="file" /></label>
+            </form>
+            <div class="admin-row-actions">
+              <button id="entry-submit" class="btn" type="button">Create PR for New Entry</button>
+              <button id="entry-archive" class="btn btn-secondary" type="button" disabled>Archive</button>
+              <button id="entry-hard-delete" class="btn btn-secondary" type="button">Hard Delete</button>
+            </div>
+            <p id="pr-result" class="admin-message"></p>
+          </section>
+        </div>
       </section>
-      <script type="module">
-        if (sessionStorage.getItem('adminAuthorized') !== 'true') {
-          window.location.replace('/admin/login/');
-        }
-      </script>`
+      <script type="module" src="/assets/admin.js"></script>`
     })
   );
 
@@ -391,7 +430,7 @@ async function main() {
     })
   );
 
-  for (const project of projects) {
+  for (const project of publishedProjects) {
     const html = marked.parse(project.full_description);
     const highlights = project.highlights.length
       ? `<section><h2>Highlights</h2><ul>${project.highlights.map((item) => `<li>${esc(item)}</li>`).join('')}</ul></section>`
@@ -638,7 +677,7 @@ async function main() {
     })
   );
 
-  const indexData = projects.map((project) => ({
+  const indexData = publishedProjects.map((project) => ({
     slug: project.slug,
     title: project.title,
     overview: project.overview,
