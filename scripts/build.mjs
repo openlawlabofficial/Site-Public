@@ -349,6 +349,10 @@ async function main() {
       content: `<section class="admin-shell admin-shell-wide">
         <h1>Admin Catalog Manager</h1>
         <p id="admin-message" class="admin-message" role="status" aria-live="polite"></p>
+        <div class="admin-row-actions">
+          <label>Admin Password<input id="admin-password-confirm" type="password" autocomplete="current-password" /></label>
+          <button id="admin-load" class="btn" type="button">Load Entries</button>
+        </div>
         <div class="admin-grid">
           <section>
             <h2>Entries</h2>

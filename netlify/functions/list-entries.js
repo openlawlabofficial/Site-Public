@@ -1,9 +1,13 @@
 const { getConfig, githubRequest } = require('./_catalogue-github');
+const { requireAdminPassword } = require('./_admin-auth');
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'GET') {
     return { statusCode: 405, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ error: 'method_not_allowed' }) };
   }
+
+  const auth = requireAdminPassword(event);
+  if (!auth.ok) return auth.response;
 
   try {
     const config = getConfig();

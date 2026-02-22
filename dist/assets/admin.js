@@ -29,11 +29,25 @@ const els = {
   hardDelete: document.getElementById('entry-hard-delete'),
   prResult: document.getElementById('pr-result'),
   message: document.getElementById('admin-message'),
-  fileInput: document.getElementById('entry-file')
+  fileInput: document.getElementById('entry-file'),
+  passwordInput: document.getElementById('admin-password-confirm'),
+  loadButton: document.getElementById('admin-load')
 };
 
 function setMessage(message) {
   if (els.message) els.message.textContent = message;
+}
+
+function getAdminPassword() {
+  return String(els.passwordInput?.value || '').trim();
+}
+
+function withAdminHeaders(headers = {}) {
+  const password = getAdminPassword();
+  return {
+    ...headers,
+    'x-admin-password': password
+  };
 }
 
 function emptyEntry() {
@@ -123,13 +137,19 @@ async function readFileAsBase64(file) {
 }
 
 async function fetchJson(url, options = {}) {
-  const response = await fetch(url, options);
+  const merged = { ...options, headers: withAdminHeaders(options.headers || {}) };
+  const response = await fetch(url, merged);
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || 'request_failed');
   return data;
 }
 
 async function refreshEntries() {
+  if (!getAdminPassword()) {
+    setMessage('Enter admin password to load entries.');
+    return;
+  }
+
   setMessage('Loading entries...');
   const data = await fetchJson('/.netlify/functions/list-entries');
   state.entries = data.entries || [];
@@ -148,6 +168,11 @@ async function submitEntry() {
   const entry = getFormEntry();
   const file = await readFileAsBase64(els.fileInput.files[0]);
 
+  if (!getAdminPassword()) {
+    setMessage('Enter admin password to continue.');
+    return;
+  }
+
   const endpoint = state.mode === 'edit' ? 'update-entry-pr' : 'create-entry-pr';
   const payload = state.mode === 'edit' ? { slug: state.activeSlug, entry, file } : { entry, file };
 
@@ -162,6 +187,11 @@ async function submitEntry() {
 }
 
 async function archiveEntry(slug) {
+  if (!getAdminPassword()) {
+    setMessage('Enter admin password to continue.');
+    return;
+  }
+
   setMessage('Archiving entry...');
   const data = await fetchJson('/.netlify/functions/archive-entry-pr', {
     method: 'POST',
@@ -174,6 +204,9 @@ async function archiveEntry(slug) {
 
 function wireEvents() {
   els.search.addEventListener('input', renderList);
+  els.loadButton.addEventListener('click', () => {
+    refreshEntries().catch((error) => setMessage(error.message));
+  });
   els.create.addEventListener('click', () => {
     setMode('create');
     setFormEntry(emptyEntry());
@@ -215,6 +248,5 @@ if (sessionStorage.getItem('adminAuthorized') !== 'true') {
   window.location.replace('/admin/login/');
 } else {
   wireEvents();
-  refreshEntries().catch((error) => setMessage(error.message));
   setFormEntry(emptyEntry());
 }

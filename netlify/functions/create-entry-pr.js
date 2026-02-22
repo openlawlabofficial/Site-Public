@@ -7,25 +7,36 @@ const {
   putBinaryFile,
   buildAssetPath
 } = require('./_catalogue-github');
+const { requireAdminPassword } = require('./_admin-auth');
+const { validateAndNormalizeEntry } = require('./_entry-schema');
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ error: 'method_not_allowed' }) };
   }
 
+  const auth = requireAdminPassword(event);
+  if (!auth.ok) return auth.response;
+
   try {
     const payload = JSON.parse(event.body || '{}');
-    const entry = payload.entry || {};
-    if (!entry.slug || !entry.title || !entry.project_type || !entry.lastupdate || !entry.overview || !entry.full_description) {
-      return { statusCode: 400, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ error: 'missing_required_fields' }) };
+    const maybeUploadedFile = payload.file && payload.file.base64 && payload.file.name;
+    const validation = validateAndNormalizeEntry(payload.entry || {});
+    if (!validation.ok) {
+      if (validation.error === 'missing_file_url' && maybeUploadedFile) {
+        // acceptable when file_url will be set from uploaded file
+      } else {
+        return { statusCode: 400, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ error: validation.error }) };
+      }
     }
 
+    const entry = validation.entry || { ...(payload.entry || {}) };
     entry.status = entry.status || 'published';
     const config = getConfig();
     const branch = makeBranchName('create', entry.slug);
     await createBranch(config, branch);
 
-    if (payload.file && payload.file.base64 && payload.file.name) {
+    if (maybeUploadedFile) {
       const assetPath = buildAssetPath(payload.file.name);
       await putBinaryFile(config, {
         filePath: assetPath,
@@ -36,11 +47,16 @@ exports.handler = async (event) => {
       entry.file_url = `/${assetPath}`;
     }
 
+    const finalValidation = validateAndNormalizeEntry(entry);
+    if (!finalValidation.ok) {
+      return { statusCode: 400, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ error: finalValidation.error }) };
+    }
+
     await putContentFile(config, {
       filePath: `entries/${entry.slug}.json`,
       branch,
       message: `Create entry ${entry.slug}`,
-      textContents: `${JSON.stringify(entry, null, 2)}\n`
+      textContents: `${JSON.stringify(finalValidation.entry, null, 2)}\n`
     });
 
     const prUrl = await createPullRequest(config, {
