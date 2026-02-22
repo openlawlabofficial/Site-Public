@@ -1,4 +1,4 @@
-const DEFAULT_REPO = process.env.CATALOGUE_REPO || 'theopenlawlab/catalogue-public';
+const DEFAULT_REPO = process.env.CATALOGUE_REPO || 'openlawlabofficial/catalogue-public';
 const DEFAULT_BASE_BRANCH = process.env.CATALOGUE_BASE_BRANCH || 'main';
 
 function getConfig() {
