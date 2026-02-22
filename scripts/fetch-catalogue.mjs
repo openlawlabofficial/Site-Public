@@ -4,18 +4,50 @@ import path from 'node:path';
 const root = process.cwd();
 const dataDir = path.join(root, 'data/projects');
 const catalogueRepo = process.env.CATALOGUE_REPO || 'theopenlawlab/catalogue-public';
+const githubToken = process.env.GITHUB_TOKEN;
 const entriesPath = `https://api.github.com/repos/${catalogueRepo}/contents/entries`;
+
+function githubHeaders(extraHeaders = {}) {
+  const headers = {
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'theopenlawlab-site-build',
+    ...extraHeaders
+  };
+
+  if (githubToken) {
+    headers.Authorization = `Bearer ${githubToken}`;
+  }
+
+  return headers;
+}
+
+function formatGithubError(status, url) {
+  if (status === 404) {
+    return [
+      `GitHub API request failed (404): ${url}`,
+      `Checked repository: ${catalogueRepo}`,
+      'This usually means the repo/path is wrong, or the repo is private and GITHUB_TOKEN is missing/invalid.'
+    ].join('\n');
+  }
+
+  if (status === 401 || status === 403) {
+    return [
+      `GitHub API request failed (${status}): ${url}`,
+      `Checked repository: ${catalogueRepo}`,
+      'If this repo is private, verify GITHUB_TOKEN is set with access to the repository.'
+    ].join('\n');
+  }
+
+  return `GitHub API request failed (${status}): ${url}`;
+}
 
 async function fetchJson(url) {
   const response = await fetch(url, {
-    headers: {
-      Accept: 'application/vnd.github+json',
-      'User-Agent': 'theopenlawlab-site-build'
-    }
+    headers: githubHeaders()
   });
 
   if (!response.ok) {
-    throw new Error(`GitHub API request failed (${response.status}): ${url}`);
+    throw new Error(formatGithubError(response.status, url));
   }
 
   return response.json();
@@ -23,9 +55,7 @@ async function fetchJson(url) {
 
 async function fetchText(url) {
   const response = await fetch(url, {
-    headers: {
-      'User-Agent': 'theopenlawlab-site-build'
-    }
+    headers: githubHeaders({ Accept: '*/*' })
   });
 
   if (!response.ok) {
