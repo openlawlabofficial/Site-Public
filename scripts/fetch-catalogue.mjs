@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const root = process.cwd();
 const dataDir = path.join(root, 'data/projects');
-const catalogueRepo = process.env.CATALOGUE_REPO || 'theopenlawlab/catalogue-public';
+const catalogueRepo = process.env.CATALOGUE_REPO || 'openlawlabofficial/catalogue-public';
 const githubToken = process.env.GITHUB_TOKEN;
 const entriesPath = `https://api.github.com/repos/${catalogueRepo}/contents/entries`;
 
