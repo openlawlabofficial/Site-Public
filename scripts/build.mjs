@@ -359,7 +359,6 @@ async function main() {
         <h1>Admin Catalog Manager</h1>
         <p id="admin-message" class="admin-message" role="status" aria-live="polite"></p>
         <div class="admin-row-actions">
-          <label>Admin Password<input id="admin-password-confirm" type="password" autocomplete="current-password" /></label>
           <button id="admin-load" class="btn" type="button">Load Entries</button>
         </div>
         <div class="admin-grid">
@@ -392,6 +391,7 @@ async function main() {
               <label>File URL<input name="file_url" /></label>
               <label>States/Territories (comma-separated)<input name="states_and_territories" /></label>
               <label>Highlights (comma-separated)<input name="highlights" /></label>
+              <label>Admin Password Confirmation<input id="entry-password-confirm" type="password" autocomplete="current-password" placeholder="Required to submit edit/archive PR" /></label>
               <label>Upload File (optional)<input id="entry-file" type="file" /></label>
             </form>
             <div class="admin-row-actions">
@@ -423,6 +423,7 @@ async function main() {
               <label>File URL<input name="file_url" /></label>
               <label>States/Territories (comma-separated)<input name="states_and_territories" /></label>
               <label>Highlights (comma-separated)<input name="highlights" /></label>
+              <label>Admin Password Confirmation<input id="entry-create-password-confirm" type="password" autocomplete="current-password" placeholder="Required to submit create PR" /></label>
               <label>Upload File (optional)<input id="entry-create-file" type="file" /></label>
             </form>
             <div class="admin-row-actions">
