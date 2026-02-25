@@ -1,5 +1,5 @@
 const REQUIRED_FIELDS = ['slug', 'title', 'overview', 'full_description', 'project_type', 'lastupdate'];
-const VALID_STATUS = ['published', 'draft', 'archived'];
+const VALID_STATUS = ['published', 'draft', 'archived', 'coming_soon'];
 const VALID_PROJECT_TYPES = ['file', 'repository'];
 
 function ensureString(value) {

@@ -1,6 +1,6 @@
 const state = {
   entries: [],
-  mode: 'create',
+  mode: 'edit',
   activeSlug: null
 };
 
@@ -25,17 +25,35 @@ const els = {
   form: document.getElementById('entry-form'),
   submit: document.getElementById('entry-submit'),
   create: document.getElementById('entry-create'),
+  createModal: document.getElementById('entry-create-modal'),
+  createModalOverlay: document.getElementById('entry-create-modal-overlay'),
+  createModalClose: document.getElementById('entry-create-modal-close'),
+  createForm: document.getElementById('entry-create-form'),
+  createSubmit: document.getElementById('entry-create-submit'),
   archive: document.getElementById('entry-archive'),
   hardDelete: document.getElementById('entry-hard-delete'),
   prResult: document.getElementById('pr-result'),
   message: document.getElementById('admin-message'),
   fileInput: document.getElementById('entry-file'),
+  createFileInput: document.getElementById('entry-create-file'),
   passwordInput: document.getElementById('admin-password-confirm'),
-  loadButton: document.getElementById('admin-load')
+  loadButton: document.getElementById('admin-load'),
+  createToast: document.getElementById('admin-toast')
 };
 
 function setMessage(message) {
   if (els.message) els.message.textContent = message;
+}
+
+function showToast(message, type = 'info') {
+  if (!els.createToast) return;
+  els.createToast.textContent = message;
+  els.createToast.dataset.kind = type;
+  els.createToast.hidden = false;
+  window.clearTimeout(showToast.timeout);
+  showToast.timeout = window.setTimeout(() => {
+    if (els.createToast) els.createToast.hidden = true;
+  }, 3600);
 }
 
 function getAdminPassword() {
@@ -69,8 +87,8 @@ function emptyEntry() {
   };
 }
 
-function getFormEntry() {
-  const formData = new FormData(els.form);
+function getFormEntry(form) {
+  const formData = new FormData(form);
   const entry = emptyEntry();
   for (const field of fields) {
     entry[field] = String(formData.get(field) || '').trim();
@@ -94,6 +112,44 @@ function setFormEntry(entry) {
   }
   els.form.elements.namedItem('states_and_territories').value = (normalized.states_and_territories || []).join(', ');
   els.form.elements.namedItem('highlights').value = (normalized.highlights || []).join(', ');
+}
+
+function validateEntry(entry) {
+  if (!entry.slug || !entry.title || !entry.overview || !entry.full_description || !entry.lastupdate) {
+    return 'Please fill in all required fields.';
+  }
+  if (!['published', 'draft', 'archived', 'coming_soon'].includes(entry.status)) {
+    return 'Status must be published, draft, archived, or coming soon.';
+  }
+  if (entry.project_type === 'repository' && !entry.repository_url) {
+    return 'Repository URL is required for repository projects.';
+  }
+  if (entry.project_type === 'file' && !entry.file_url) {
+    return 'File URL is required for file projects.';
+  }
+  return null;
+}
+
+function openCreateModal() {
+  if (!els.createModal || !els.createForm) return;
+  els.createForm.reset();
+  for (const field of fields) {
+    const input = els.createForm.elements.namedItem(field);
+    if (!input) continue;
+    input.value = field === 'lastupdate' ? new Date().toISOString().slice(0, 10) : '';
+  }
+  const defaultStatus = els.createForm.elements.namedItem('status');
+  if (defaultStatus) defaultStatus.value = 'published';
+  const defaultType = els.createForm.elements.namedItem('project_type');
+  if (defaultType) defaultType.value = 'file';
+  els.createModal.hidden = false;
+  document.body.classList.add('dialog-open');
+}
+
+function closeCreateModal() {
+  if (!els.createModal) return;
+  els.createModal.hidden = true;
+  document.body.classList.remove('dialog-open');
 }
 
 function renderList() {
@@ -160,30 +216,41 @@ async function refreshEntries() {
 function setMode(mode, slug = null) {
   state.mode = mode;
   state.activeSlug = slug;
-  els.submit.textContent = mode === 'edit' ? 'Create PR for Edit' : 'Create PR for New Entry';
+  els.submit.textContent = 'Create a new PR';
   els.archive.disabled = mode !== 'edit';
 }
 
-async function submitEntry() {
-  const entry = getFormEntry();
-  const file = await readFileAsBase64(els.fileInput.files[0]);
+async function submitEntry({ form, fileInput, mode }) {
+  const entry = getFormEntry(form);
+  const validationError = validateEntry(entry);
+  if (validationError) {
+    setMessage(validationError);
+    showToast(validationError, 'error');
+    return;
+  }
+
+  const file = await readFileAsBase64(fileInput.files[0]);
 
   if (!getAdminPassword()) {
     setMessage('Enter admin password to continue.');
     return;
   }
 
-  const endpoint = state.mode === 'edit' ? 'update-entry-pr' : 'create-entry-pr';
-  const payload = state.mode === 'edit' ? { slug: state.activeSlug, entry, file } : { entry, file };
+  const endpoint = mode === 'edit' ? 'update-entry-pr' : 'create-entry-pr';
+  const payload = mode === 'edit' ? { slug: state.activeSlug, entry, file } : { entry, file };
 
-  setMessage('Creating PR...');
+  const actionLabel = mode === 'edit' ? 'Updating entry PR...' : 'Creating entry PR...';
+  setMessage(actionLabel);
   const data = await fetchJson(`/.netlify/functions/${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
   els.prResult.innerHTML = `<a href="${data.prUrl}" target="_blank" rel="noopener noreferrer">Open Pull Request</a>`;
+  showToast('PR created successfully.', 'success');
+  setMessage('PR created successfully.');
   await refreshEntries();
+  if (mode === 'create') closeCreateModal();
 }
 
 async function archiveEntry(slug) {
@@ -199,6 +266,7 @@ async function archiveEntry(slug) {
     body: JSON.stringify({ slug, mode: 'archive' })
   });
   els.prResult.innerHTML = `<a href="${data.prUrl}" target="_blank" rel="noopener noreferrer">Open Pull Request</a>`;
+  showToast('Archive PR created successfully.', 'success');
   await refreshEntries();
 }
 
@@ -208,13 +276,34 @@ function wireEvents() {
     refreshEntries().catch((error) => setMessage(error.message));
   });
   els.create.addEventListener('click', () => {
-    setMode('create');
-    setFormEntry(emptyEntry());
+    openCreateModal();
   });
-  els.submit.addEventListener('click', submitEntry);
+  els.createModalClose?.addEventListener('click', closeCreateModal);
+  els.createModalOverlay?.addEventListener('click', closeCreateModal);
+  els.submit.addEventListener('click', () => {
+    if (!state.activeSlug) {
+      const message = 'Select a project before creating an edit PR.';
+      setMessage(message);
+      showToast(message, 'error');
+      return;
+    }
+    submitEntry({ form: els.form, fileInput: els.fileInput, mode: 'edit' }).catch((error) => {
+      setMessage(error.message);
+      showToast(error.message, 'error');
+    });
+  });
+  els.createSubmit?.addEventListener('click', () => {
+    submitEntry({ form: els.createForm, fileInput: els.createFileInput, mode: 'create' }).catch((error) => {
+      setMessage(error.message);
+      showToast(error.message, 'error');
+    });
+  });
   els.archive.addEventListener('click', () => {
     if (!state.activeSlug) return;
-    archiveEntry(state.activeSlug).catch((error) => setMessage(error.message));
+    archiveEntry(state.activeSlug).catch((error) => {
+      setMessage(error.message);
+      showToast(error.message, 'error');
+    });
   });
   els.hardDelete.addEventListener('click', () => {
     alert('We can’t verify your credentials, this feature is turned off temporarily.');
@@ -228,12 +317,16 @@ function wireEvents() {
       if (!selected) return;
       setMode('edit', slug);
       setFormEntry(selected.entry);
+      showToast(`Editing ${selected.entry.title || slug}.`, 'info');
       return;
     }
 
     const archive = event.target.closest('[data-archive]');
     if (archive) {
-      archiveEntry(archive.dataset.archive).catch((error) => setMessage(error.message));
+      archiveEntry(archive.dataset.archive).catch((error) => {
+        setMessage(error.message);
+        showToast(error.message, 'error');
+      });
       return;
     }
 
@@ -249,4 +342,5 @@ if (sessionStorage.getItem('adminAuthorized') !== 'true') {
 } else {
   wireEvents();
   setFormEntry(emptyEntry());
+  setMessage('Select an entry to edit, or create a new one from the modal.');
 }

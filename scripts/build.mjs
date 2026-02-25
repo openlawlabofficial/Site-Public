@@ -44,6 +44,8 @@ const requiredFields = [
   'lastupdate'
 ];
 
+const validStatuses = ['published', 'draft', 'archived', 'coming_soon'];
+
 const ensureDir = async (directory) => fs.mkdir(directory, { recursive: true });
 
 const formatDate = (value) =>
@@ -161,8 +163,10 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
 </html>`;
 
 const projectCard = (project) => `<article class="project-card" data-project-card>
-  <h3><a href="/projects/${project.slug}/">${esc(project.title)}</a></h3>
+  <h3>${project.status === 'coming_soon' ? esc(project.title) : `<a href="/projects/${project.slug}/">${esc(project.title)}</a>`}</h3>
+  ${project.status === 'coming_soon' ? '<p class="meta"><strong>Status:</strong> <span class="tag">Coming Soon</span></p>' : ''}
   <p>${esc(project.overview)}</p>
+  ${project.status === 'coming_soon' && project.highlights.length ? `<section><h4>Highlights</h4><ul>${project.highlights.map((item) => `<li>${esc(item)}</li>`).join('')}</ul></section>` : ''}
   <p class="meta"><strong>Topic:</strong> ${esc(project.topic || 'General')}</p>
   <p class="meta"><strong>Legal Area:</strong> ${esc(project.legal_area || 'General')}</p>
   <p class="meta"><strong>Project Type:</strong> ${esc(project.project_type)}</p>
@@ -215,6 +219,9 @@ async function loadProjects() {
     project.legal_area = project.legal_area || '';
     project.featured = Boolean(project.featured);
     project.status = project.status || 'published';
+    if (!validStatuses.includes(project.status)) {
+      throw new Error(`Field status must be one of ${validStatuses.join(', ')} in ${file}`);
+    }
     projects.push(project);
   }
   return projects.sort((a, b) => b.lastupdate.localeCompare(a.lastupdate));
@@ -241,7 +248,9 @@ async function main() {
   await writeFile('assets/brand-icon.svg', await fs.readFile(path.join(root, 'src/assets/brand-icon.svg'), 'utf8'));
   await writeFile('assets/footer-o-icon.svg', await fs.readFile(path.join(root, 'src/assets/footer-o-icon.svg'), 'utf8'));
 
-  const featured = publishedProjects.slice(0, 3).map(projectCard).join('');
+  const featureEligible = projects.filter((project) => ['published', 'coming_soon'].includes(project.status));
+  const explicitFeatured = featureEligible.filter((project) => project.featured);
+  const featured = (explicitFeatured.length ? explicitFeatured : featureEligible.slice(0, 3)).map(projectCard).join('');
   const featuredSection = featured
     ? `<div class="grid">${featured}</div>`
     : '<p class="empty-state">Sorry we can’t find you any projects right now, check back soon!</p>';
@@ -364,7 +373,7 @@ async function main() {
             </table>
           </section>
           <section>
-            <h2>Create / Edit Entry</h2>
+            <h2>Edit Entry</h2>
             <div class="admin-row-actions">
               <button id="entry-create" class="btn" type="button">Create New</button>
             </div>
@@ -373,7 +382,7 @@ async function main() {
               <label>Title<input name="title" required /></label>
               <label>Project Type<select name="project_type"><option value="file">file</option><option value="repository">repository</option></select></label>
               <label>Last Update<input name="lastupdate" type="date" required /></label>
-              <label>Status<select name="status"><option value="published">published</option><option value="draft">draft</option><option value="archived">archived</option></select></label>
+              <label>Status<select name="status"><option value="published">published</option><option value="draft">draft</option><option value="archived">archived</option><option value="coming_soon">coming soon</option></select></label>
               <label>Overview<textarea name="overview" rows="3" required></textarea></label>
               <label>Full Description (Markdown)<textarea name="full_description" rows="5" required></textarea></label>
               <label>Author<input name="author" /></label>
@@ -386,11 +395,39 @@ async function main() {
               <label>Upload File (optional)<input id="entry-file" type="file" /></label>
             </form>
             <div class="admin-row-actions">
-              <button id="entry-submit" class="btn" type="button">Create PR for New Entry</button>
+              <button id="entry-submit" class="btn" type="button">Create a new PR</button>
               <button id="entry-archive" class="btn btn-secondary" type="button" disabled>Archive</button>
               <button id="entry-hard-delete" class="btn btn-secondary" type="button">Hard Delete</button>
             </div>
             <p id="pr-result" class="admin-message"></p>
+          </section>
+        </div>
+        <p id="admin-toast" class="admin-toast" role="status" aria-live="polite" hidden></p>
+        <div id="entry-create-modal" class="admin-create-modal" hidden>
+          <div id="entry-create-modal-overlay" class="dialog-overlay"></div>
+          <section class="dialog-content admin-create-modal-content" role="dialog" aria-modal="true" aria-labelledby="entry-create-modal-title">
+            <button id="entry-create-modal-close" class="dialog-close" type="button" aria-label="Close create project dialog">×</button>
+            <h3 id="entry-create-modal-title">Create New Project</h3>
+            <form id="entry-create-form" class="admin-form" novalidate>
+              <label>Slug<input name="slug" required /></label>
+              <label>Title<input name="title" required /></label>
+              <label>Project Type<select name="project_type"><option value="file">file</option><option value="repository">repository</option></select></label>
+              <label>Last Update<input name="lastupdate" type="date" required /></label>
+              <label>Status<select name="status"><option value="published">published</option><option value="draft">draft</option><option value="archived">archived</option><option value="coming_soon">coming soon</option></select></label>
+              <label>Overview<textarea name="overview" rows="3" required></textarea></label>
+              <label>Full Description (Markdown)<textarea name="full_description" rows="5" required></textarea></label>
+              <label>Author<input name="author" /></label>
+              <label>Topic<input name="topic" /></label>
+              <label>Legal Area<input name="legal_area" /></label>
+              <label>Repository URL<input name="repository_url" /></label>
+              <label>File URL<input name="file_url" /></label>
+              <label>States/Territories (comma-separated)<input name="states_and_territories" /></label>
+              <label>Highlights (comma-separated)<input name="highlights" /></label>
+              <label>Upload File (optional)<input id="entry-create-file" type="file" /></label>
+            </form>
+            <div class="admin-row-actions">
+              <button id="entry-create-submit" class="btn" type="button">Create a new PR</button>
+            </div>
           </section>
         </div>
       </section>
