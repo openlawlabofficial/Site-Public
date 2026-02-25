@@ -1,4 +1,4 @@
-const REQUIRED_FIELDS = ['slug', 'title', 'overview', 'full_description', 'project_type', 'lastupdate'];
+const BASE_REQUIRED_FIELDS = ['slug', 'title', 'project_type', 'lastupdate'];
 const VALID_STATUS = ['published', 'draft', 'archived', 'coming_soon'];
 const VALID_PROJECT_TYPES = ['file', 'repository'];
 
@@ -42,9 +42,19 @@ function validateAndNormalizeEntry(input, { expectedSlug } = {}) {
   entry.highlights = highlights;
   entry.states_and_territories = states;
 
-  for (const field of REQUIRED_FIELDS) {
+  for (const field of BASE_REQUIRED_FIELDS) {
     if (!entry[field]) {
       return { ok: false, error: `missing_required_field:${field}` };
+    }
+  }
+
+  if (entry.status !== 'coming_soon') {
+    if (!entry.overview) {
+      return { ok: false, error: 'missing_required_field:overview' };
+    }
+
+    if (!entry.full_description) {
+      return { ok: false, error: 'missing_required_field:full_description' };
     }
   }
 
@@ -60,12 +70,14 @@ function validateAndNormalizeEntry(input, { expectedSlug } = {}) {
     return { ok: false, error: 'slug_mismatch' };
   }
 
-  if (entry.project_type === 'repository' && !entry.repository_url) {
-    return { ok: false, error: 'missing_repository_url' };
-  }
+  if (entry.status !== 'coming_soon') {
+    if (entry.project_type === 'repository' && !entry.repository_url) {
+      return { ok: false, error: 'missing_repository_url' };
+    }
 
-  if (entry.project_type === 'file' && !entry.file_url) {
-    return { ok: false, error: 'missing_file_url' };
+    if (entry.project_type === 'file' && !entry.file_url) {
+      return { ok: false, error: 'missing_file_url' };
+    }
   }
 
   return { ok: true, entry };

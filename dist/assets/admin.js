@@ -36,7 +36,8 @@ const els = {
   message: document.getElementById('admin-message'),
   fileInput: document.getElementById('entry-file'),
   createFileInput: document.getElementById('entry-create-file'),
-  passwordInput: document.getElementById('admin-password-confirm'),
+  editPasswordInput: document.getElementById('entry-password-confirm'),
+  createPasswordInput: document.getElementById('entry-create-password-confirm'),
   loadButton: document.getElementById('admin-load'),
   createToast: document.getElementById('admin-toast')
 };
@@ -56,16 +57,43 @@ function showToast(message, type = 'info') {
   }, 3600);
 }
 
-function getAdminPassword() {
-  return String(els.passwordInput?.value || '').trim();
+function getWorkflowPassword(mode) {
+  const input = mode === 'create' ? els.createPasswordInput : els.editPasswordInput;
+  return String(input?.value || '').trim();
 }
 
-function withAdminHeaders(headers = {}) {
-  const password = getAdminPassword();
-  return {
-    ...headers,
-    'x-admin-password': password
-  };
+function explainRequestError(rawError) {
+  const message = String(rawError || 'request_failed');
+
+  if (message.includes('missing_github_token')) {
+    return 'Unable to create PR right now: GitHub token is not configured on the server.';
+  }
+
+  if (message.includes('invalid_catalogue_repo')) {
+    return 'Unable to create PR right now: catalogue repository configuration is invalid.';
+  }
+
+  if (message.includes('github_401') || message.includes('github_403')) {
+    return 'Unable to create PR right now: GitHub access is unauthorized or missing required permissions.';
+  }
+
+  if (message.includes('github_404')) {
+    return 'Unable to create PR right now: expected repository path or branch could not be found.';
+  }
+
+  if (message.includes('github_422')) {
+    return 'Unable to create PR: GitHub rejected the update. Check for duplicate branch names or invalid entry data.';
+  }
+
+  if (message.startsWith('missing_required_field:')) {
+    return `Missing required field: ${message.split(':')[1]}.`;
+  }
+
+  if (message.startsWith('missing_')) {
+    return message.replaceAll('_', ' ');
+  }
+
+  return message;
 }
 
 function emptyEntry() {
@@ -115,16 +143,20 @@ function setFormEntry(entry) {
 }
 
 function validateEntry(entry) {
-  if (!entry.slug || !entry.title || !entry.overview || !entry.full_description || !entry.lastupdate) {
+  const isComingSoon = entry.status === 'coming_soon';
+  if (!entry.slug || !entry.title || !entry.lastupdate) {
     return 'Please fill in all required fields.';
+  }
+  if (!isComingSoon && (!entry.overview || !entry.full_description)) {
+    return 'Overview and full description are required unless status is coming soon.';
   }
   if (!['published', 'draft', 'archived', 'coming_soon'].includes(entry.status)) {
     return 'Status must be published, draft, archived, or coming soon.';
   }
-  if (entry.project_type === 'repository' && !entry.repository_url) {
+  if (!isComingSoon && entry.project_type === 'repository' && !entry.repository_url) {
     return 'Repository URL is required for repository projects.';
   }
-  if (entry.project_type === 'file' && !entry.file_url) {
+  if (!isComingSoon && entry.project_type === 'file' && !entry.file_url) {
     return 'File URL is required for file projects.';
   }
   return null;
@@ -193,19 +225,24 @@ async function readFileAsBase64(file) {
 }
 
 async function fetchJson(url, options = {}) {
-  const merged = { ...options, headers: withAdminHeaders(options.headers || {}) };
-  const response = await fetch(url, merged);
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || 'request_failed');
-  return data;
+  const response = await fetch(url, options);
+  let data = null;
+
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    const rawError = data?.error || `request_failed:${response.status}`;
+    throw new Error(explainRequestError(rawError));
+  }
+
+  return data || {};
 }
 
 async function refreshEntries() {
-  if (!getAdminPassword()) {
-    setMessage('Enter admin password to load entries.');
-    return;
-  }
-
   setMessage('Loading entries...');
   const data = await fetchJson('/.netlify/functions/list-entries');
   state.entries = data.entries || [];
@@ -231,8 +268,11 @@ async function submitEntry({ form, fileInput, mode }) {
 
   const file = await readFileAsBase64(fileInput.files[0]);
 
-  if (!getAdminPassword()) {
-    setMessage('Enter admin password to continue.');
+  const workflowPassword = getWorkflowPassword(mode);
+  if (!workflowPassword) {
+    const message = 'Enter admin password to continue.';
+    setMessage(message);
+    showToast(message, 'error');
     return;
   }
 
@@ -254,8 +294,11 @@ async function submitEntry({ form, fileInput, mode }) {
 }
 
 async function archiveEntry(slug) {
-  if (!getAdminPassword()) {
-    setMessage('Enter admin password to continue.');
+  const workflowPassword = getWorkflowPassword('edit');
+  if (!workflowPassword) {
+    const message = 'Enter admin password to continue.';
+    setMessage(message);
+    showToast(message, 'error');
     return;
   }
 
@@ -273,7 +316,10 @@ async function archiveEntry(slug) {
 function wireEvents() {
   els.search.addEventListener('input', renderList);
   els.loadButton.addEventListener('click', () => {
-    refreshEntries().catch((error) => setMessage(error.message));
+    refreshEntries().catch((error) => {
+      setMessage(error.message);
+      showToast(error.message, 'error');
+    });
   });
   els.create.addEventListener('click', () => {
     openCreateModal();
