@@ -115,16 +115,20 @@ function setFormEntry(entry) {
 }
 
 function validateEntry(entry) {
-  if (!entry.slug || !entry.title || !entry.overview || !entry.full_description || !entry.lastupdate) {
+  const isComingSoon = entry.status === 'coming_soon';
+  if (!entry.slug || !entry.title || !entry.lastupdate) {
     return 'Please fill in all required fields.';
+  }
+  if (!isComingSoon && (!entry.overview || !entry.full_description)) {
+    return 'Overview and full description are required unless status is coming soon.';
   }
   if (!['published', 'draft', 'archived', 'coming_soon'].includes(entry.status)) {
     return 'Status must be published, draft, archived, or coming soon.';
   }
-  if (entry.project_type === 'repository' && !entry.repository_url) {
+  if (!isComingSoon && entry.project_type === 'repository' && !entry.repository_url) {
     return 'Repository URL is required for repository projects.';
   }
-  if (entry.project_type === 'file' && !entry.file_url) {
+  if (!isComingSoon && entry.project_type === 'file' && !entry.file_url) {
     return 'File URL is required for file projects.';
   }
   return null;
