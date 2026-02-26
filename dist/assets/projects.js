@@ -44,7 +44,7 @@ const sortResults = (items) => {
   return sorted;
 };
 
-const projectHref = (project) => (project.status === 'coming_soon' ? null : `/projects/${project.slug}/`);
+const projectHref = (project) => `/projects/${project.slug}/`;
 
 const fuzzyMatch = (project, query) => {
   if (!query) return true;
@@ -79,7 +79,7 @@ const renderCards = () => {
   els.results.innerHTML = pageItems
     .map(
       (project) => `<article class="project-card">
-      <h2>${projectHref(project) ? `<a href="${projectHref(project)}">${project.title}</a>` : project.title}</h2>
+      <h2><a href="${projectHref(project)}">${project.title}</a></h2>
       ${project.status === 'coming_soon' ? '<p class="meta"><strong>Status:</strong> <span class="tag">Coming Soon</span></p>' : ''}
       <p>${project.overview}</p>
       <p class="meta"><strong>Topic:</strong> ${project.topic || 'General'}</p>
