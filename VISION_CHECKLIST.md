@@ -1,7 +1,7 @@
-# TheOpenLawLab Public Website Vision & Implementation Checklist
+# Open Legal Systems Project Public Website Vision & Implementation Checklist
 
 ## Vision
-Build a static-first, accessible, civic-tech public website that clearly explains TheOpenLawLab mission and makes it easy to discover, evaluate, and access open-source legal aid projects.
+Build a static-first, accessible, civic-tech public website that clearly explains the Open Legal Systems Project mission and makes it easy to discover, evaluate, and access open-source legal aid projects.
 
 ## Status Legend
 - [x] Implemented
