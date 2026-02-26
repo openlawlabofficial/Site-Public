@@ -84,6 +84,7 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
     <meta name="twitter:description" content="${esc(description)}" />
     <link rel="canonical" href="${site.baseUrl}${canonicalPath}" />
     <link rel="stylesheet" href="/assets/styles.css" />
+    <link rel="modulepreload" href="/assets/home-landing.js" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>

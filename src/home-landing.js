@@ -14,7 +14,8 @@ if (!canvas) {
     let simulationTime = 0;
     let lastRenderTime = 0;
     const MAX_TIMESTEP_SECONDS = 1 / 24;
-    const COMET_SPEED_FACTOR = 0.6;
+    const COMET_SPEED = 0.006;
+    const COMET_DIRECTION = { x: 1, y: 1 };
 
     const blobs = [
       { speed: 0.045, radius: 0.58, offset: 0.0, hue: 32, lightness: 64, alpha: 0.24 },
@@ -32,29 +33,33 @@ if (!canvas) {
 
     const comets = Array.from({ length: 28 }, (_, index) => {
       const sizeScale = Math.random();
+      const color = cometPalette[index % cometPalette.length];
       return {
         x: Math.random(),
         y: Math.random(),
-        travelSpeed: (0.008 + Math.random() * 0.018) * COMET_SPEED_FACTOR,
-        travelTilt: 0.24 + Math.random() * 0.28,
-        driftSpeed: (0.002 + Math.random() * 0.008) * COMET_SPEED_FACTOR,
-        driftAmountX: 0.006 + Math.random() * 0.02,
-        driftAmountY: 0.004 + Math.random() * 0.016,
-        size: 0.7 + sizeScale * 4.1,
-        phase: Math.random() * Math.PI * 2,
-        tailLength: 26 + Math.random() * 110,
-        tailPulse: (0.35 + Math.random() * 0.95) * (0.72 + Math.random() * 0.2),
-        tailAngle: -(0.62 + Math.random() * 0.34),
-        color: cometPalette[index % cometPalette.length]
+        driftPhase: Math.random() * Math.PI * 2,
+        size: 0.9 + sizeScale * 2.6,
+        tailLength: 38 + Math.random() * 34,
+        color,
+        trailColorHead: `hsla(${color.hue}, 100%, ${color.lightness}%, ${color.alpha})`,
+        trailColorMid: `hsla(${color.hue}, 92%, ${Math.max(color.lightness - 10, 46)}%, 0.32)`,
+        glowColorCore: `hsla(${color.hue}, 100%, 92%, 0.4)`
       };
     });
 
     const heroSection = canvas.closest('.landing-hero');
 
-    const getCanvasRect = () => ({
-      width: Math.max(Math.round(window.innerWidth || document.documentElement.clientWidth || 1), 1),
-      height: Math.max(Math.round(window.innerHeight || document.documentElement.clientHeight || 1), 1)
-    });
+    const getCanvasRect = () => {
+      if (!heroSection) {
+        return { width: 1, height: 1 };
+      }
+
+      const rect = heroSection.getBoundingClientRect();
+      return {
+        width: Math.max(Math.round(rect.width || heroSection.clientWidth || 1), 1),
+        height: Math.max(Math.round(rect.height || heroSection.clientHeight || 1), 1)
+      };
+    };
 
     let active = false;
     const updateActive = () => {
@@ -81,31 +86,22 @@ if (!canvas) {
     };
 
     const drawComet = (comet, timeSeconds) => {
-      const progress = (timeSeconds * comet.travelSpeed + comet.phase * 0.12) % 1;
-      const lifecycle = Math.min(progress / 0.16, (1 - progress) / 0.22, 1);
-      const visibility = Math.max(0, lifecycle);
-      if (visibility <= 0) return;
+      const xProgress = (comet.x + timeSeconds * COMET_SPEED * COMET_DIRECTION.x) % 1;
+      const yProgress = (comet.y + timeSeconds * COMET_SPEED * COMET_DIRECTION.y) % 1;
 
-      const orbitX = (comet.x + progress * comet.travelTilt) % 1;
-      const orbitY = -0.16 + progress * 1.34;
-      const driftX = Math.sin(timeSeconds * comet.driftSpeed + comet.phase) * width * comet.driftAmountX;
-      const driftY = Math.cos(timeSeconds * comet.driftSpeed * 1.25 + comet.phase) * height * comet.driftAmountY;
+      const drift = Math.sin(timeSeconds * 0.2 + comet.driftPhase) * 0.012;
+      const headX = width * xProgress;
+      const headY = height * yProgress + drift * height;
 
-      const headX = width * orbitX + driftX;
-      const headY = height * (0.08 + orbitY * 0.74) + driftY;
-
-      const tailMotion = 0.66 + Math.sin(timeSeconds * comet.tailPulse + comet.phase) * 0.22;
-      const tail = comet.tailLength * tailMotion;
-      const angle = comet.tailAngle + Math.sin(timeSeconds * comet.tailPulse * 0.42 + comet.phase) * 0.12;
+      const angle = Math.atan2(COMET_DIRECTION.y, COMET_DIRECTION.x);
       const dirX = Math.cos(angle);
       const dirY = Math.sin(angle);
-      const tailX = headX - dirX * tail;
-      const tailY = headY - dirY * tail;
+      const tailX = headX - dirX * comet.tailLength;
+      const tailY = headY - dirY * comet.tailLength;
 
-      const headAlpha = comet.color.alpha * visibility;
       const gradient = context.createLinearGradient(headX, headY, tailX, tailY);
-      gradient.addColorStop(0, `hsla(${comet.color.hue}, 100%, ${comet.color.lightness}%, ${headAlpha})`);
-      gradient.addColorStop(0.26, `hsla(${comet.color.hue}, 92%, ${Math.max(comet.color.lightness - 10, 46)}%, 0.34)`);
+      gradient.addColorStop(0, comet.trailColorHead);
+      gradient.addColorStop(0.32, comet.trailColorMid);
       gradient.addColorStop(1, `hsla(${comet.color.hue}, 80%, 30%, 0)`);
 
       context.save();
@@ -118,12 +114,12 @@ if (!canvas) {
       context.lineTo(headX, headY);
       context.stroke();
 
-      const headGlow = context.createRadialGradient(headX, headY, 0, headX, headY, comet.size * 9);
-      headGlow.addColorStop(0, `hsla(${comet.color.hue}, 100%, 92%, ${0.42 * visibility})`);
+      const headGlow = context.createRadialGradient(headX, headY, 0, headX, headY, comet.size * 8);
+      headGlow.addColorStop(0, comet.glowColorCore);
       headGlow.addColorStop(1, `hsla(${comet.color.hue}, 90%, 70%, 0)`);
       context.fillStyle = headGlow;
       context.beginPath();
-      context.arc(headX, headY, comet.size * 8, 0, Math.PI * 2);
+      context.arc(headX, headY, comet.size * 7, 0, Math.PI * 2);
       context.fill();
       context.restore();
     };
@@ -166,8 +162,8 @@ if (!canvas) {
 
       context.fillStyle = 'rgba(255,255,255,0.03)';
       for (let i = 0; i < 45; i += 1) {
-        const px = ((i * 197.33 + t * 23) % width);
-        const py = ((i * 121.77 + t * 17) % height);
+        const px = (i * 197.33 + t * 23) % width;
+        const py = (i * 121.77 + t * 17) % height;
         context.fillRect(px, py, 1.5, 1.5);
       }
     };
@@ -190,14 +186,19 @@ if (!canvas) {
       requestAnimationFrame(() => {
         tickQueued = false;
         updateActive();
-        queueResize();
       });
     };
 
     updateActive();
     window.addEventListener('scroll', queueTick, { passive: true });
-    window.addEventListener('resize', queueTick, { passive: true });
-    window.visualViewport?.addEventListener('resize', queueTick, { passive: true });
+    window.addEventListener('resize', queueResize, { passive: true });
+    window.visualViewport?.addEventListener('resize', queueResize, { passive: true });
+
+    if ('ResizeObserver' in window && heroSection) {
+      const heroResizeObserver = new ResizeObserver(queueResize);
+      heroResizeObserver.observe(heroSection);
+      window.addEventListener('beforeunload', () => heroResizeObserver.disconnect(), { once: true });
+    }
 
     let heroObserver;
     if ('IntersectionObserver' in window && heroSection) {
@@ -210,8 +211,8 @@ if (!canvas) {
     window.addEventListener('beforeunload', () => {
       cancelAnimationFrame(frame);
       window.removeEventListener('scroll', queueTick);
-      window.removeEventListener('resize', queueTick);
-      window.visualViewport?.removeEventListener('resize', queueTick);
+      window.removeEventListener('resize', queueResize);
+      window.visualViewport?.removeEventListener('resize', queueResize);
       heroObserver?.disconnect();
     }, { once: true });
   }
