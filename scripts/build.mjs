@@ -31,7 +31,7 @@ const footerData = {
     { href: 'https://github.com', label: 'GitHub', icon: 'G' },
     { href: 'https://www.linkedin.com', label: 'LinkedIn', icon: 'L' }
   ],
-  title: 'Open Legal Systems Project',
+  title: 'Open Legal Systems',
   subtitle: 'Open-source legal infrastructure for everyone'
 };
 
