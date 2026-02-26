@@ -242,6 +242,7 @@ async function main() {
   await ensureDir(distDir);
   const projects = await loadProjects();
   const publishedProjects = projects.filter((project) => project.status === 'published');
+  const visibleProjects = projects.filter((project) => ['published', 'coming_soon'].includes(project.status));
 
   await writeFile('assets/styles.css', await fs.readFile(path.join(root, 'src/styles.css'), 'utf8'));
   await writeFile('assets/projects.js', await fs.readFile(path.join(root, 'src/projects.js'), 'utf8'));
@@ -476,15 +477,17 @@ async function main() {
     })
   );
 
-  for (const project of publishedProjects) {
-    const html = marked.parse(project.full_description);
+  for (const project of visibleProjects) {
+    const html = project.full_description ? marked.parse(project.full_description) : '';
     const highlights = project.highlights.length
       ? `<section><h2>Highlights</h2><ul>${project.highlights.map((item) => `<li>${esc(item)}</li>`).join('')}</ul></section>`
       : '';
     const resourceCta =
-      project.project_type === 'repository'
-        ? `<a class="btn" href="${esc(project.repository_url)}" target="_blank" rel="noopener noreferrer">View Repository</a>`
-        : `<a class="btn" href="${esc(project.file_url)}" target="_blank" rel="noopener noreferrer">Open File</a>`;
+      project.status === 'coming_soon'
+        ? ''
+        : project.project_type === 'repository'
+          ? `<a class="btn" href="${esc(project.repository_url)}" target="_blank" rel="noopener noreferrer">View Repository</a>`
+          : `<a class="btn" href="${esc(project.file_url)}" target="_blank" rel="noopener noreferrer">Open File</a>`;
     await writeFile(
       `projects/${project.slug}/index.html`,
       layout({
@@ -493,6 +496,7 @@ async function main() {
         canonicalPath: `/projects/${project.slug}/`,
         content: `<article>
           <h1>${esc(project.title)}</h1>
+          ${project.status === 'coming_soon' ? '<p class="project-warning"><strong>This project is not yet released, you are free to read about its projected behaviour, but you will need to wait until it is released to test. If you would like to be involved in beta testing this project, please contact us!</strong></p>' : ''}
           <ul class="tag-list">${project.states_and_territories.map((item) => `<li class="tag">${esc(item)}</li>`).join('')}</ul>
           <p><strong>Author:</strong> ${esc(optionalText(project.author))}</p>
           <p><strong>Topic:</strong> ${esc(optionalText(project.topic))}</p>
@@ -504,10 +508,8 @@ async function main() {
             <p>${esc(project.overview)}</p>
           </section>
           ${highlights}
-          <div class="markdown">${html}</div>
-          <div class="cta-row">
-            ${resourceCta}
-          </div>
+          ${html ? `<div class="markdown">${html}</div>` : ''}
+          ${resourceCta ? `<div class="cta-row">${resourceCta}</div>` : ''}
         </article>`
       })
     );
@@ -723,7 +725,7 @@ async function main() {
     })
   );
 
-  const indexData = publishedProjects.map((project) => ({
+  const indexData = visibleProjects.map((project) => ({
     slug: project.slug,
     title: project.title,
     overview: project.overview,
@@ -733,7 +735,8 @@ async function main() {
     legal_area: project.legal_area || '',
     project_type: project.project_type,
     lastupdate: project.lastupdate,
-    featured: Boolean(project.featured)
+    featured: Boolean(project.featured),
+    status: project.status
   }));
 
   await writeFile('search-index.json', JSON.stringify(indexData, null, 2));
