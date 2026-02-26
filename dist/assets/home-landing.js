@@ -49,44 +49,27 @@ if (!canvas) {
       };
     });
 
-    let viewportWidth = 0;
-    let viewportHeight = 0;
-    const hasTouchInput = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
-    let touchInteractionActive = false;
-    let touchResizePending = false;
+    const heroSection = canvas.closest('.landing-hero');
 
-    const getViewport = () => {
-      const visualViewport = window.visualViewport;
-      const measuredWidth = Math.round(visualViewport?.width || window.innerWidth || document.documentElement.clientWidth || 0);
-      const measuredHeight = Math.round(visualViewport?.height || window.innerHeight || document.documentElement.clientHeight || 0);
-      const nextWidth = measuredWidth > 0 ? measuredWidth : viewportWidth;
-      const nextHeight = measuredHeight > 0 ? measuredHeight : viewportHeight;
-      return { nextWidth, nextHeight };
+    const getCanvasRect = () => {
+      const rect = heroSection?.getBoundingClientRect();
+      const fallbackWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+      const fallbackHeight = Math.max(Math.round((window.innerHeight || document.documentElement.clientHeight || 0) * 1.2), 560);
+      return {
+        width: Math.max(Math.round(rect?.width || fallbackWidth), 1),
+        height: Math.max(Math.round(rect?.height || fallbackHeight), 1)
+      };
     };
 
     const resize = () => {
-      const ratio = Math.max(window.devicePixelRatio || 1, 1);
-      const { nextWidth, nextHeight } = getViewport();
+      const ratio = Math.min(Math.max(window.devicePixelRatio || 1, 1), 2);
+      const nextSize = getCanvasRect();
 
-      if (!viewportWidth || !viewportHeight) {
-        viewportWidth = nextWidth;
-        viewportHeight = nextHeight;
-      } else {
-        const widthChanged = nextWidth > 220 && Math.abs(nextWidth - viewportWidth) > 1;
-        const heightDelta = nextHeight - viewportHeight;
-        const meaningfulHeightChange = nextHeight > 220 && Math.abs(heightDelta) > 24;
+      width = nextSize.width;
+      height = nextSize.height;
 
-        // Apply any meaningful height update so comets remain aligned after viewport shifts.
-        const shouldApplyHeightChange = meaningfulHeightChange;
-
-        if (widthChanged) viewportWidth = nextWidth;
-        if (shouldApplyHeightChange) viewportHeight = nextHeight;
-      }
-
-      width = viewportWidth;
-      height = Math.max(viewportHeight * 1.2, 560);
-      canvas.width = Math.floor(width * ratio);
-      canvas.height = Math.floor(height * ratio);
+      canvas.width = Math.max(Math.floor(width * ratio), 1);
+      canvas.height = Math.max(Math.floor(height * ratio), 1);
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -190,42 +173,25 @@ if (!canvas) {
       resizeQueued = true;
       requestAnimationFrame(() => {
         resizeQueued = false;
-        if (touchInteractionActive) {
-          touchResizePending = true;
-          return;
-        }
         resize();
       });
     };
 
-    const onTouchStart = () => {
-      touchInteractionActive = true;
-    };
-
-    const onTouchEnd = () => {
-      touchInteractionActive = false;
-      if (touchResizePending) {
-        touchResizePending = false;
-        queueResize();
-      }
-    };
-
     window.addEventListener('resize', queueResize, { passive: true });
     window.visualViewport?.addEventListener('resize', queueResize, { passive: true });
-    if (hasTouchInput) {
-      window.addEventListener('touchstart', onTouchStart, { passive: true });
-      window.addEventListener('touchend', onTouchEnd, { passive: true });
-      window.addEventListener('touchcancel', onTouchEnd, { passive: true });
+    let resizeObserver;
+    if ('ResizeObserver' in window && heroSection) {
+      resizeObserver = new ResizeObserver(queueResize);
+      resizeObserver.observe(heroSection);
     }
+
     frame = requestAnimationFrame(render);
 
     window.addEventListener('beforeunload', () => {
       cancelAnimationFrame(frame);
-      if (hasTouchInput) {
-        window.removeEventListener('touchstart', onTouchStart);
-        window.removeEventListener('touchend', onTouchEnd);
-        window.removeEventListener('touchcancel', onTouchEnd);
-      }
+      window.removeEventListener('resize', queueResize);
+      window.visualViewport?.removeEventListener('resize', queueResize);
+      resizeObserver?.disconnect();
     }, { once: true });
   }
 }
