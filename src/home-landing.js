@@ -3,171 +3,144 @@ const canvas = document.querySelector('[data-landing-canvas]');
 if (!canvas) {
   // Not on home page.
 } else {
-  const context = canvas.getContext('2d');
+  const heroSection = canvas.closest('.landing-hero');
+  const gl = canvas.getContext('webgl2', {
+    antialias: false,
+    alpha: true,
+    depth: false,
+    stencil: false,
+    powerPreference: 'high-performance',
+    preserveDrawingBuffer: false
+  });
 
-  if (!context) {
-    // Canvas unsupported.
+  if (!gl) {
+    heroSection?.classList.add('landing-hero-ready');
   } else {
-    let width = 0;
-    let height = 0;
-    let frame = 0;
-    let simulationTime = 0;
-    let lastRenderTime = 0;
-    const MAX_TIMESTEP_SECONDS = 1 / 24;
-    const COMET_SPEED_FACTOR = 0.6;
+    const vertexSource = `#version 300 es
+      precision highp float;
+      layout (location = 0) in vec2 aPosition;
+      out vec2 vUv;
+      void main() {
+        vUv = aPosition * 0.5 + 0.5;
+        gl_Position = vec4(aPosition, 0.0, 1.0);
+      }
+    `;
 
-    const blobs = [
-      { speed: 0.045, radius: 0.58, offset: 0.0, hue: 32, lightness: 64, alpha: 0.24 },
-      { speed: 0.035, radius: 0.46, offset: 1.7, hue: 24, lightness: 56, alpha: 0.18 },
-      { speed: 0.03, radius: 0.66, offset: 3.4, hue: 42, lightness: 58, alpha: 0.16 },
-      { speed: 0.04, radius: 0.4, offset: 5.1, hue: 14, lightness: 52, alpha: 0.15 }
-    ];
+    const fragmentSource = `#version 300 es
+      precision highp float;
+      in vec2 vUv;
+      out vec4 outColor;
 
-    const cometPalette = [
-      { hue: 33, lightness: 76, alpha: 0.78 },
-      { hue: 24, lightness: 70, alpha: 0.72 },
-      { hue: 18, lightness: 65, alpha: 0.7 },
-      { hue: 42, lightness: 80, alpha: 0.74 }
-    ];
+      uniform vec2 uResolution;
+      uniform float uTime;
 
-    const comets = Array.from({ length: 28 }, (_, index) => {
-      const sizeScale = Math.random();
-      return {
-        x: Math.random(),
-        y: Math.random(),
-        travelSpeed: (0.008 + Math.random() * 0.018) * COMET_SPEED_FACTOR,
-        travelTilt: 0.24 + Math.random() * 0.28,
-        driftSpeed: (0.002 + Math.random() * 0.008) * COMET_SPEED_FACTOR,
-        driftAmountX: 0.006 + Math.random() * 0.02,
-        driftAmountY: 0.004 + Math.random() * 0.016,
-        size: 0.7 + sizeScale * 4.1,
-        phase: Math.random() * Math.PI * 2,
-        tailLength: 26 + Math.random() * 110,
-        tailPulse: (0.35 + Math.random() * 0.95) * (0.72 + Math.random() * 0.2),
-        tailAngle: -(0.62 + Math.random() * 0.34),
-        color: cometPalette[index % cometPalette.length]
-      };
-    });
+      #define PI 3.14159265359
 
-    const heroSection = canvas.closest('.landing-hero');
+      float hash(float p) {
+        return fract(sin(p * 127.1) * 43758.5453123);
+      }
 
-    const getCanvasRect = () => {
-      const rect = heroSection?.getBoundingClientRect();
-      const fallbackWidth = window.innerWidth || document.documentElement.clientWidth || 0;
-      const fallbackHeight = Math.max(Math.round((window.innerHeight || document.documentElement.clientHeight || 0) * 1.2), 560);
-      return {
-        width: Math.max(Math.round(rect?.width || fallbackWidth), 1),
-        height: Math.max(Math.round(rect?.height || fallbackHeight), 1)
-      };
+      vec2 hash2(float p) {
+        return vec2(hash(p), hash(p + 17.13));
+      }
+
+      float glow(vec2 p, vec2 center, float size, float power) {
+        float d = length(p - center);
+        return pow(max(0.0, 1.0 - d / size), power);
+      }
+
+      vec3 palette(float t) {
+        vec3 a = vec3(0.11, 0.08, 0.06);
+        vec3 b = vec3(0.60, 0.30, 0.10);
+        vec3 c = vec3(0.25, 0.16, 0.08);
+        vec3 d = vec3(0.42, 0.33, 0.20);
+        return a + b * cos(6.28318 * (c * t + d));
+      }
+
+      void main() {
+        vec2 uv = vUv;
+        vec2 p = (uv * 2.0 - 1.0);
+        p.x *= uResolution.x / max(uResolution.y, 1.0);
+
+        vec3 color = mix(vec3(0.08, 0.05, 0.03), vec3(0.05, 0.04, 0.04), uv.y);
+
+        for (int i = 0; i < 4; i += 1) {
+          float fi = float(i);
+          vec2 c = vec2(
+            0.25 * sin(uTime * (0.09 + fi * 0.03) + fi * 1.7),
+            0.20 * cos(uTime * (0.08 + fi * 0.025) + fi * 2.1)
+          );
+          float intensity = glow(p, c, 1.2 - fi * 0.15, 2.1);
+          color += vec3(0.24 + fi * 0.06, 0.12 + fi * 0.03, 0.07) * intensity * 0.20;
+        }
+
+        for (int i = 0; i < 28; i += 1) {
+          float fi = float(i);
+          vec2 seed = hash2(fi * 13.7);
+          vec2 seed2 = hash2(fi * 31.9);
+
+          float travel = fract(uTime * (0.04 + seed.x * 0.03) + seed.y);
+          vec2 head = vec2(
+            -0.75 + travel * (1.75 + seed2.x * 0.4) + sin(uTime * 0.2 + fi) * 0.04,
+            0.9 - travel * 1.8 + cos(uTime * 0.18 + fi * 0.7) * 0.05
+          );
+
+          vec2 dir = normalize(vec2(-0.65 - seed.x * 0.35, 0.45 + seed.y * 0.28));
+          float trail = 0.16 + seed2.y * 0.24;
+          vec2 rel = p - head;
+          float along = clamp(dot(rel, -dir), 0.0, trail);
+          vec2 nearest = head - dir * along;
+          float dist = length(p - nearest);
+
+          float tail = smoothstep(0.08, 0.0, dist) * smoothstep(trail, 0.0, along);
+          float headGlow = smoothstep(0.06, 0.0, length(rel));
+
+          vec3 cometColor = mix(vec3(1.0, 0.74, 0.42), vec3(0.95, 0.52, 0.28), seed.x);
+          color += cometColor * (tail * 0.45 + headGlow * 0.70);
+        }
+
+        float dust = hash(dot(floor(uv * uResolution * 0.13), vec2(17.0, 59.0)) + floor(uTime * 12.0));
+        color += vec3(dust * 0.03);
+
+        color = pow(color, vec3(0.9));
+        outColor = vec4(color, 1.0);
+      }
+    `;
+
+    const compileShader = (type, source) => {
+      const shader = gl.createShader(type);
+      if (!shader) return null;
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        const log = gl.getShaderInfoLog(shader);
+        gl.deleteShader(shader);
+        throw new Error(`Shader compile failed: ${log}`);
+      }
+      return shader;
     };
+
+    let program;
+    let animationFrame;
+    let started = false;
+    let resizeQueued = false;
+    const state = { startTime: 0 };
 
     const resize = () => {
       const ratio = Math.min(Math.max(window.devicePixelRatio || 1, 1), 2);
-      const nextSize = getCanvasRect();
+      const nextWidth = Math.max(Math.floor((window.innerWidth || document.documentElement.clientWidth || 1) * ratio), 1);
+      const nextHeight = Math.max(Math.floor((window.innerHeight || document.documentElement.clientHeight || 1) * ratio), 1);
 
-      width = nextSize.width;
-      height = nextSize.height;
-
-      canvas.width = Math.max(Math.floor(width * ratio), 1);
-      canvas.height = Math.max(Math.floor(height * ratio), 1);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    };
-
-    const drawComet = (comet, timeSeconds) => {
-      const progress = (timeSeconds * comet.travelSpeed + comet.phase * 0.12) % 1;
-      const lifecycle = Math.min(progress / 0.16, (1 - progress) / 0.22, 1);
-      const visibility = Math.max(0, lifecycle);
-      if (visibility <= 0) return;
-
-      const orbitX = (comet.x + progress * comet.travelTilt) % 1;
-      const orbitY = -0.16 + progress * 1.34;
-      const driftX = Math.sin(timeSeconds * comet.driftSpeed + comet.phase) * width * comet.driftAmountX;
-      const driftY = Math.cos(timeSeconds * comet.driftSpeed * 1.25 + comet.phase) * height * comet.driftAmountY;
-
-      const headX = width * orbitX + driftX;
-      const headY = height * (0.08 + orbitY * 0.74) + driftY;
-
-      const tailMotion = 0.66 + Math.sin(timeSeconds * comet.tailPulse + comet.phase) * 0.22;
-      const tail = comet.tailLength * tailMotion;
-      const angle = comet.tailAngle + Math.sin(timeSeconds * comet.tailPulse * 0.42 + comet.phase) * 0.12;
-      const dirX = Math.cos(angle);
-      const dirY = Math.sin(angle);
-      const tailX = headX - dirX * tail;
-      const tailY = headY - dirY * tail;
-
-      const headAlpha = comet.color.alpha * visibility;
-      const gradient = context.createLinearGradient(headX, headY, tailX, tailY);
-      gradient.addColorStop(0, `hsla(${comet.color.hue}, 100%, ${comet.color.lightness}%, ${headAlpha})`);
-      gradient.addColorStop(0.26, `hsla(${comet.color.hue}, 92%, ${Math.max(comet.color.lightness - 10, 46)}%, 0.34)`);
-      gradient.addColorStop(1, `hsla(${comet.color.hue}, 80%, 30%, 0)`);
-
-      context.save();
-      context.globalCompositeOperation = 'lighter';
-      context.strokeStyle = gradient;
-      context.lineWidth = comet.size;
-      context.lineCap = 'round';
-      context.beginPath();
-      context.moveTo(tailX, tailY);
-      context.lineTo(headX, headY);
-      context.stroke();
-
-      const headGlow = context.createRadialGradient(headX, headY, 0, headX, headY, comet.size * 9);
-      headGlow.addColorStop(0, `hsla(${comet.color.hue}, 100%, 92%, ${0.42 * visibility})`);
-      headGlow.addColorStop(1, `hsla(${comet.color.hue}, 90%, 70%, 0)`);
-      context.fillStyle = headGlow;
-      context.beginPath();
-      context.arc(headX, headY, comet.size * 8, 0, Math.PI * 2);
-      context.fill();
-      context.restore();
-    };
-
-    const render = (time) => {
-      const now = time * 0.001;
-      if (!lastRenderTime) lastRenderTime = now;
-      const delta = Math.min(now - lastRenderTime, MAX_TIMESTEP_SECONDS);
-      lastRenderTime = now;
-      simulationTime += Math.max(delta, 0);
-
-      const t = simulationTime;
-      frame = requestAnimationFrame(render);
-
-      const gradient = context.createLinearGradient(0, 0, width, height);
-      gradient.addColorStop(0, '#140d08');
-      gradient.addColorStop(0.42, '#21140d');
-      gradient.addColorStop(0.78, '#16100f');
-      gradient.addColorStop(1, '#0f0d0d');
-      context.fillStyle = gradient;
-      context.fillRect(0, 0, width, height);
-
-      for (const blob of blobs) {
-        const x = width * (0.5 + Math.sin(t * blob.speed + blob.offset) * 0.22);
-        const y = height * (0.4 + Math.cos(t * (blob.speed * 1.2) + blob.offset) * 0.18);
-        const r = Math.min(width, height) * blob.radius;
-
-        const glow = context.createRadialGradient(x, y, 0, x, y, r);
-        glow.addColorStop(0, `hsla(${blob.hue}, 90%, ${blob.lightness}%, ${blob.alpha})`);
-        glow.addColorStop(0.42, `hsla(${blob.hue}, 84%, ${Math.max(blob.lightness - 10, 40)}%, ${blob.alpha * 0.5})`);
-        glow.addColorStop(1, `hsla(${blob.hue}, 78%, 30%, 0)`);
-        context.fillStyle = glow;
-        context.fillRect(x - r, y - r, r * 2, r * 2);
+      if (canvas.width !== nextWidth || canvas.height !== nextHeight) {
+        canvas.width = nextWidth;
+        canvas.height = nextHeight;
       }
 
-      for (const comet of comets) {
-        drawComet(comet, t);
-      }
-
-      context.fillStyle = 'rgba(255,255,255,0.03)';
-      for (let i = 0; i < 45; i += 1) {
-        const px = ((i * 197.33 + t * 23) % width);
-        const py = ((i * 121.77 + t * 17) % height);
-        context.fillRect(px, py, 1.5, 1.5);
-      }
+      canvas.style.width = `${Math.max(Math.round(nextWidth / ratio), 1)}px`;
+      canvas.style.height = `${Math.max(Math.round(nextHeight / ratio), 1)}px`;
+      gl.viewport(0, 0, canvas.width, canvas.height);
     };
 
-    resize();
-    let resizeQueued = false;
     const queueResize = () => {
       if (resizeQueued) return;
       resizeQueued = true;
@@ -177,21 +150,89 @@ if (!canvas) {
       });
     };
 
-    window.addEventListener('resize', queueResize, { passive: true });
-    window.visualViewport?.addEventListener('resize', queueResize, { passive: true });
-    let resizeObserver;
-    if ('ResizeObserver' in window && heroSection) {
-      resizeObserver = new ResizeObserver(queueResize);
-      resizeObserver.observe(heroSection);
+    const render = (timestamp) => {
+      if (!started) return;
+      if (!state.startTime) state.startTime = timestamp;
+      const elapsed = (timestamp - state.startTime) * 0.001;
+
+      const resolutionLocation = gl.getUniformLocation(program, 'uResolution');
+      const timeLocation = gl.getUniformLocation(program, 'uTime');
+
+      gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+      gl.uniform1f(timeLocation, elapsed);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+      animationFrame = requestAnimationFrame(render);
+    };
+
+    const prewarm = () => {
+      const vertexShader = compileShader(gl.VERTEX_SHADER, vertexSource);
+      const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragmentSource);
+      if (!vertexShader || !fragmentShader) return false;
+
+      program = gl.createProgram();
+      if (!program) return false;
+
+      gl.attachShader(program, vertexShader);
+      gl.attachShader(program, fragmentShader);
+      gl.linkProgram(program);
+
+      gl.deleteShader(vertexShader);
+      gl.deleteShader(fragmentShader);
+
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        throw new Error(`Program link failed: ${gl.getProgramInfoLog(program)}`);
+      }
+
+      const quad = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        -1, -1,
+         1, -1,
+        -1,  1,
+         1,  1
+      ]), gl.STATIC_DRAW);
+
+      gl.useProgram(program);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+      resize();
+      gl.clearColor(0.05, 0.04, 0.04, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      return true;
+    };
+
+    const start = () => {
+      if (started) return;
+      try {
+        if (!prewarm()) return;
+      } catch {
+        heroSection?.classList.add('landing-hero-ready');
+        return;
+      }
+
+      started = true;
+      heroSection?.classList.add('landing-hero-ready');
+      window.addEventListener('resize', queueResize, { passive: true });
+      window.visualViewport?.addEventListener('resize', queueResize, { passive: true });
+      animationFrame = requestAnimationFrame(render);
+    };
+
+    if (document.readyState === 'complete') {
+      start();
+    } else {
+      window.addEventListener('load', start, { once: true });
     }
 
-    frame = requestAnimationFrame(render);
-
     window.addEventListener('beforeunload', () => {
-      cancelAnimationFrame(frame);
+      started = false;
+      cancelAnimationFrame(animationFrame);
       window.removeEventListener('resize', queueResize);
       window.visualViewport?.removeEventListener('resize', queueResize);
-      resizeObserver?.disconnect();
+      window.removeEventListener('load', start);
+      if (program) gl.deleteProgram(program);
     }, { once: true });
   }
 }
