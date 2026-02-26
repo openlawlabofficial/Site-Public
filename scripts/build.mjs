@@ -119,6 +119,7 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
         <div class="dialog-header">
           <h2 id="dialog-title">Welcome to the Open Legal Systems Project</h2>
           <p id="dialog-description">We just launched. Thanks for visiting — more projects, tools, and resources are coming soon.</p>
+          <p><strong>Join our Discord:</strong> <a href="https://discord.gg/TtGyQMVsU" target="_blank" rel="noopener noreferrer">https://discord.gg/TtGyQMVsU</a></p>
         </div>
       </section>
     </div>
@@ -288,6 +289,10 @@ async function main() {
       <section>
         <h2>Featured Projects</h2>
         ${featuredSection}
+      </section>
+      <section>
+        <h2>Get Involved</h2>
+        <p>Volunteer, contribute a project and/or join our discord <a href="https://discord.gg/TtGyQMVsU" target="_blank" rel="noopener noreferrer">https://discord.gg/TtGyQMVsU</a>.</p>
       </section>
       <script type="module" src="/assets/home-landing.js"></script>`
     })
@@ -659,6 +664,10 @@ async function main() {
         <h1>Volunteer</h1>
         <p>Volunteering supports project review, maintenance, and new development for open legal-aid systems.</p>
         <p>If you would like to become a volunteer, please apply here and we’ll get back to you as soon as possible.</p>
+        <section>
+          <h2>Join our Discord!</h2>
+          <p><a href="https://discord.gg/TtGyQMVsU" target="_blank" rel="noopener noreferrer">https://discord.gg/TtGyQMVsU</a></p>
+        </section>
         <div class="cta-row">
           <a class="btn" href="/contact/">Contact Us</a>
           <a class="btn btn-secondary" href="/contribute/">Back to Contribute</a>
