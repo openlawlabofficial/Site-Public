@@ -51,14 +51,19 @@ if (!canvas) {
 
     const heroSection = canvas.closest('.landing-hero');
 
-    const getCanvasRect = () => {
+    const getCanvasRect = () => ({
+      width: Math.max(Math.round(window.innerWidth || document.documentElement.clientWidth || 1), 1),
+      height: Math.max(Math.round(window.innerHeight || document.documentElement.clientHeight || 1), 1)
+    });
+
+    let active = false;
+    const updateActive = () => {
       const rect = heroSection?.getBoundingClientRect();
-      const fallbackWidth = window.innerWidth || document.documentElement.clientWidth || 0;
-      const fallbackHeight = Math.max(Math.round((window.innerHeight || document.documentElement.clientHeight || 0) * 1.2), 560);
-      return {
-        width: Math.max(Math.round(rect?.width || fallbackWidth), 1),
-        height: Math.max(Math.round(rect?.height || fallbackHeight), 1)
-      };
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+      const nextActive = Boolean(rect && rect.bottom > 0 && rect.top < viewportHeight);
+      if (nextActive === active) return;
+      active = nextActive;
+      heroSection?.classList.toggle('landing-hero-active', active);
     };
 
     const resize = () => {
@@ -132,6 +137,7 @@ if (!canvas) {
 
       const t = simulationTime;
       frame = requestAnimationFrame(render);
+      if (!active) return;
 
       const gradient = context.createLinearGradient(0, 0, width, height);
       gradient.addColorStop(0, '#140d08');
@@ -177,21 +183,36 @@ if (!canvas) {
       });
     };
 
-    window.addEventListener('resize', queueResize, { passive: true });
-    window.visualViewport?.addEventListener('resize', queueResize, { passive: true });
-    let resizeObserver;
-    if ('ResizeObserver' in window && heroSection) {
-      resizeObserver = new ResizeObserver(queueResize);
-      resizeObserver.observe(heroSection);
+    let tickQueued = false;
+    const queueTick = () => {
+      if (tickQueued) return;
+      tickQueued = true;
+      requestAnimationFrame(() => {
+        tickQueued = false;
+        updateActive();
+        queueResize();
+      });
+    };
+
+    updateActive();
+    window.addEventListener('scroll', queueTick, { passive: true });
+    window.addEventListener('resize', queueTick, { passive: true });
+    window.visualViewport?.addEventListener('resize', queueTick, { passive: true });
+
+    let heroObserver;
+    if ('IntersectionObserver' in window && heroSection) {
+      heroObserver = new IntersectionObserver(updateActive, { threshold: [0, 0.01, 0.25, 0.75, 1] });
+      heroObserver.observe(heroSection);
     }
 
     frame = requestAnimationFrame(render);
 
     window.addEventListener('beforeunload', () => {
       cancelAnimationFrame(frame);
-      window.removeEventListener('resize', queueResize);
-      window.visualViewport?.removeEventListener('resize', queueResize);
-      resizeObserver?.disconnect();
+      window.removeEventListener('scroll', queueTick);
+      window.removeEventListener('resize', queueTick);
+      window.visualViewport?.removeEventListener('resize', queueTick);
+      heroObserver?.disconnect();
     }, { once: true });
   }
 }
