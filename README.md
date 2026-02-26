@@ -1,4 +1,4 @@
-# TheOpenLawLab Public Site
+# Open Legal Systems Project Public Site
 
 Static-first public website implementation for project discovery and mission pages.
 
