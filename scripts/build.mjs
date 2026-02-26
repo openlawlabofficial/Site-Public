@@ -218,6 +218,7 @@ async function loadProjects() {
     }
     project.highlights = project.highlights || [];
     project.states_and_territories = project.states_and_territories || [];
+    project.overview = project.overview || '';
     project.author = project.author || '';
     project.topic = project.topic || '';
     project.legal_area = project.legal_area || '';
@@ -479,6 +480,7 @@ async function main() {
 
   for (const project of visibleProjects) {
     const html = project.full_description ? marked.parse(project.full_description) : '';
+    const overviewText = project.overview || (project.status === 'coming_soon' ? 'Overview coming soon.' : '');
     const highlights = project.highlights.length
       ? `<section><h2>Highlights</h2><ul>${project.highlights.map((item) => `<li>${esc(item)}</li>`).join('')}</ul></section>`
       : '';
@@ -492,7 +494,7 @@ async function main() {
       `projects/${project.slug}/index.html`,
       layout({
         title: `${project.title} | TheOpenLawLab`,
-        description: project.overview,
+        description: overviewText,
         canonicalPath: `/projects/${project.slug}/`,
         content: `<article>
           <h1>${esc(project.title)}</h1>
@@ -505,7 +507,7 @@ async function main() {
           <p><strong>Updated:</strong> ${esc(formatDate(project.lastupdate))}</p>
           <section>
             <h2>Overview</h2>
-            <p>${esc(project.overview)}</p>
+            <p>${esc(overviewText)}</p>
           </section>
           ${highlights}
           ${html ? `<div class="markdown">${html}</div>` : ''}
@@ -728,7 +730,7 @@ async function main() {
   const indexData = visibleProjects.map((project) => ({
     slug: project.slug,
     title: project.title,
-    overview: project.overview,
+    overview: project.overview || '',
     highlights: project.highlights,
     states_and_territories: project.states_and_territories,
     topic: project.topic || '',
