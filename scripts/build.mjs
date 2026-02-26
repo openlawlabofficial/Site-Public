@@ -116,7 +116,7 @@ const layout = ({ title, description, canonicalPath, content }) => `<!doctype ht
           ×
         </button>
         <div class="dialog-header">
-          <h2 id="dialog-title">Welcome to Open Legal Systems Project</h2>
+          <h2 id="dialog-title">Welcome to the Open Legal Systems Project</h2>
           <p id="dialog-description">We just launched. Thanks for visiting — more projects, tools, and resources are coming soon.</p>
         </div>
       </section>
@@ -281,8 +281,8 @@ async function main() {
         </div>
       </section>
       <section class="hero">
-        <h2>What is Open Legal Systems Project?</h2>
-        <p>Open Legal Systems Project is a public-interest engineering initiative focused on open, reusable legal-aid tooling. Volunteers and domain practitioners collaborate to ship practical tools for intake, communications, and case preparation.</p>
+        <h2>What is the Open Legal Systems Project?</h2>
+        <p>The Open Legal Systems Project (OLSP) is a public-interest engineering initiative focused on open, reusable legal-aid tooling. Volunteers and domain practitioners collaborate to ship practical tools for intake, communications, and case preparation.</p>
       </section>
       <section>
         <h2>Featured Projects</h2>
@@ -297,7 +297,7 @@ async function main() {
     'admin/login/index.html',
     layout({
       title: 'Admin Login | Open Legal Systems Project',
-      description: 'Admin access portal for Open Legal Systems Project.',
+      description: 'Admin access portal for the Open Legal Systems Project.',
       canonicalPath: '/admin/login/',
       content: `<section class="admin-shell">
         <h1>Admin Access</h1>
@@ -359,7 +359,7 @@ async function main() {
     'admin/index.html',
     layout({
       title: 'Admin | Open Legal Systems Project',
-      description: 'Admin area for Open Legal Systems Project.',
+      description: 'Admin area for the Open Legal Systems Project.',
       canonicalPath: '/admin/',
       content: `<section class="admin-shell admin-shell-wide">
         <h1>Admin Catalog Manager</h1>
@@ -446,7 +446,7 @@ async function main() {
     'projects/index.html',
     layout({
       title: 'Projects | Open Legal Systems Project',
-      description: 'Search and browse open-source legal aid projects from Open Legal Systems Project.',
+      description: 'Search and browse open-source legal aid projects from the Open Legal Systems Project.',
       canonicalPath: '/projects/',
       content: `<section>
         <h1>Project Catalog</h1>
@@ -521,10 +521,10 @@ async function main() {
     'about/index.html',
     layout({
       title: 'About | Open Legal Systems Project',
-      description: 'Learn about the mission and operating model behind Open Legal Systems Project.',
+      description: 'Learn about the mission and operating model behind the Open Legal Systems Project.',
       canonicalPath: '/about/',
       content: `<section>
-        <h1>About Open Legal Systems Project</h1>
+        <h1>About the Open Legal Systems Project</h1>
         <p><strong>Open-source tools for legal aid operations.</strong></p>
         <h2>Our Mission</h2>
         <p>Our mission is to provide free, open-source, high-quality solutions for legal problems, whether broad or highly specific, created by and for the public-interest community.</p>
@@ -552,11 +552,11 @@ async function main() {
     'contribute/index.html',
     layout({
       title: 'Contribute | Open Legal Systems Project',
-      description: 'Learn how to submit projects, volunteer, or donate to support Open Legal Systems Project.',
+      description: 'Learn how to submit projects, volunteer, or donate to support the Open Legal Systems Project.',
       canonicalPath: '/contribute/',
       content: `<section>
         <h1>Contribute</h1>
-        <p>Contribution at Open Legal Systems Project includes <strong>submission + verification</strong>, <strong>volunteering</strong>, and <strong>donation</strong>.</p>
+        <p>Contribution at the Open Legal Systems Project includes <strong>submission + verification</strong>, <strong>volunteering</strong>, and <strong>donation</strong>.</p>
         <div class="grid">
           <article class="project-card">
             <h2><a href="/contribute/submit/">Submit a Project</a></h2>
@@ -627,7 +627,7 @@ async function main() {
     'contribute/submit/index.html',
     layout({
       title: 'Submit | Contribute | Open Legal Systems Project',
-      description: 'Submission and verification guidance for contributing projects to Open Legal Systems Project.',
+      description: 'Submission and verification guidance for contributing projects to the Open Legal Systems Project.',
       canonicalPath: '/contribute/submit/',
       content: `<section>
         <h1>Submit a Project</h1>
@@ -670,7 +670,7 @@ async function main() {
     'contact/index.html',
     layout({
       title: 'Contact Us | Open Legal Systems Project',
-      description: 'Reach out to Open Legal Systems Project with questions, collaboration ideas, or contribution inquiries.',
+      description: 'Reach out to the Open Legal Systems Project with questions, collaboration ideas, or contribution inquiries.',
       canonicalPath: '/contact/',
       content: `<section>
         <div class="contact-card">
@@ -715,7 +715,7 @@ async function main() {
     'contribute/donate/index.html',
     layout({
       title: 'Donate | Contribute | Open Legal Systems Project',
-      description: 'Support Open Legal Systems Project with donations to sustain open legal-aid infrastructure.',
+      description: 'Support the Open Legal Systems Project with donations to sustain open legal-aid infrastructure.',
       canonicalPath: '/contribute/donate/',
       content: `<section>
         <h1>Donate</h1>
