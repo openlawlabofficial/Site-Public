@@ -102,7 +102,7 @@ function emptyEntry() {
     title: '',
     overview: '',
     full_description: '',
-    project_type: 'file',
+    project_type: 'repository',
     lastupdate: new Date().toISOString().slice(0, 10),
     status: 'published',
     author: '',
@@ -153,8 +153,8 @@ function validateEntry(entry) {
   if (!['published', 'draft', 'archived', 'coming_soon'].includes(entry.status)) {
     return 'Status must be published, draft, archived, or coming soon.';
   }
-  if (!isComingSoon && entry.project_type === 'repository' && !entry.repository_url) {
-    return 'Repository URL is required for repository projects.';
+  if (!isComingSoon && ['repository', 'application'].includes(entry.project_type) && !entry.repository_url) {
+    return 'Repository URL is required for repository and application projects.';
   }
   if (!isComingSoon && entry.project_type === 'file' && !entry.file_url) {
     return 'File URL is required for file projects.';
@@ -173,7 +173,7 @@ function openCreateModal() {
   const defaultStatus = els.createForm.elements.namedItem('status');
   if (defaultStatus) defaultStatus.value = 'published';
   const defaultType = els.createForm.elements.namedItem('project_type');
-  if (defaultType) defaultType.value = 'file';
+  if (defaultType) defaultType.value = 'repository';
   els.createModal.hidden = false;
   document.body.classList.add('dialog-open');
 }

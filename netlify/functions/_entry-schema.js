@@ -1,6 +1,6 @@
 const BASE_REQUIRED_FIELDS = ['slug', 'title', 'project_type', 'lastupdate'];
 const VALID_STATUS = ['published', 'draft', 'archived', 'coming_soon'];
-const VALID_PROJECT_TYPES = ['file', 'repository'];
+const VALID_PROJECT_TYPES = ['file', 'repository', 'application', 'database'];
 
 function ensureString(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -71,7 +71,7 @@ function validateAndNormalizeEntry(input, { expectedSlug } = {}) {
   }
 
   if (entry.status !== 'coming_soon') {
-    if (entry.project_type === 'repository' && !entry.repository_url) {
+    if (['repository', 'application'].includes(entry.project_type) && !entry.repository_url) {
       return { ok: false, error: 'missing_repository_url' };
     }
 
