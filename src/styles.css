@@ -123,6 +123,7 @@ body {
   margin-left: -50vw;
   margin-right: -50vw;
   min-height: clamp(30rem, 88vh, 52rem);
+  min-height: clamp(30rem, 88svh, 52rem);
   display: grid;
   align-items: end;
   overflow: hidden;
@@ -161,6 +162,7 @@ body {
   width: min(980px, 92%);
   margin: 0 auto;
   padding: 0 0 10vh;
+  padding: 0 0 10svh;
 }
 .landing-hero-content h1 {
   font-size: clamp(2rem, 6.8vw, 5rem);
