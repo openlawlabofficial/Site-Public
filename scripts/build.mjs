@@ -192,8 +192,8 @@ async function loadProjects() {
       }
     }
 
-    if (!['file', 'repository'].includes(project.project_type)) {
-      throw new Error(`Field project_type must be either "file" or "repository" in ${file}`);
+    if (!['file', 'repository', 'application', 'database'].includes(project.project_type)) {
+      throw new Error(`Field project_type must be one of "file", "repository", "application", or "database" in ${file}`);
     }
 
     const status = project.status || 'published';
@@ -206,8 +206,8 @@ async function loadProjects() {
       throw new Error(`Missing required field "full_description" in ${file}`);
     }
 
-    if (!isComingSoon && project.project_type === 'repository' && !project.repository_url) {
-      throw new Error(`Field repository_url is required when project_type is "repository" in ${file}`);
+    if (!isComingSoon && ['repository', 'application'].includes(project.project_type) && !project.repository_url) {
+      throw new Error(`Field repository_url is required when project_type is "repository" or "application" in ${file}`);
     }
     if (!isComingSoon && project.project_type === 'file' && !project.file_url) {
       throw new Error(`Field file_url is required when project_type is "file" in ${file}`);
@@ -391,7 +391,7 @@ async function main() {
             <form id="entry-form" class="admin-form" novalidate>
               <label>Slug<input name="slug" required /></label>
               <label>Title<input name="title" required /></label>
-              <label>Project Type<select name="project_type"><option value="file">file</option><option value="repository">repository</option></select></label>
+              <label>Project Type<select name="project_type"><option value="repository">repository</option><option value="application">application</option><option value="file">file</option><option value="database">database</option></select></label>
               <label>Last Update<input name="lastupdate" type="date" required /></label>
               <label>Status<select name="status"><option value="published">published</option><option value="draft">draft</option><option value="archived">archived</option><option value="coming_soon">coming soon</option></select></label>
               <label>Overview<textarea name="overview" rows="3" required></textarea></label>
@@ -423,7 +423,7 @@ async function main() {
             <form id="entry-create-form" class="admin-form" novalidate>
               <label>Slug<input name="slug" required /></label>
               <label>Title<input name="title" required /></label>
-              <label>Project Type<select name="project_type"><option value="file">file</option><option value="repository">repository</option></select></label>
+              <label>Project Type<select name="project_type"><option value="repository">repository</option><option value="application">application</option><option value="file">file</option><option value="database">database</option></select></label>
               <label>Last Update<input name="lastupdate" type="date" required /></label>
               <label>Status<select name="status"><option value="published">published</option><option value="draft">draft</option><option value="archived">archived</option><option value="coming_soon">coming soon</option></select></label>
               <label>Overview<textarea name="overview" rows="3" required></textarea></label>
@@ -493,9 +493,11 @@ async function main() {
     const resourceCta =
       project.status === 'coming_soon'
         ? ''
-        : project.project_type === 'repository'
+        : ['repository', 'application'].includes(project.project_type)
           ? `<a class="btn" href="${esc(project.repository_url)}" target="_blank" rel="noopener noreferrer">View Repository</a>`
-          : `<a class="btn" href="${esc(project.file_url)}" target="_blank" rel="noopener noreferrer">Open File</a>`;
+          : project.project_type === 'file'
+            ? `<a class="btn" href="${esc(project.file_url)}" target="_blank" rel="noopener noreferrer">Open File</a>`
+            : '';
     await writeFile(
       `projects/${project.slug}/index.html`,
       layout({
