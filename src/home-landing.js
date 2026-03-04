@@ -62,10 +62,18 @@ if (!canvas) {
     };
 
     let active = false;
+    const ACTIVE_MARGIN_PX = 64;
+    let pixelRatio = 1;
     const updateActive = () => {
       const rect = heroSection?.getBoundingClientRect();
       const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
-      const nextActive = Boolean(rect && rect.bottom > 0 && rect.top < viewportHeight);
+      const nextActive = Boolean(
+        rect && (
+          active
+            ? rect.bottom > -ACTIVE_MARGIN_PX && rect.top < viewportHeight + ACTIVE_MARGIN_PX
+            : rect.bottom > ACTIVE_MARGIN_PX && rect.top < viewportHeight - ACTIVE_MARGIN_PX
+        )
+      );
       if (nextActive === active) return;
       active = nextActive;
       heroSection?.classList.toggle('landing-hero-active', active);
@@ -74,6 +82,12 @@ if (!canvas) {
     const resize = () => {
       const ratio = Math.min(Math.max(window.devicePixelRatio || 1, 1), 2);
       const nextSize = getCanvasRect();
+
+      if (nextSize.width === width && nextSize.height === height && ratio === pixelRatio) {
+        return;
+      }
+
+      pixelRatio = ratio;
 
       width = nextSize.width;
       height = nextSize.height;
